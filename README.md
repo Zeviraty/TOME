@@ -1,4 +1,8 @@
-# T.O.M.E.
+<div align="center">
+  <br>
+  <h1>Tome MUD</h1>
+  <strong>For creating 🌟Amazing🌟 Muds </strong>
+</div>
 
 TOME is a multi-user text engine designed to be used with traditional mud clients
 
