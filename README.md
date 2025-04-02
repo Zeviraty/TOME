@@ -3,10 +3,10 @@
   <h1>Tome MUD</h1>
   <strong>For creating 🌟Amazing🌟 Muds </strong>
 </div>
-
+<p align="center">
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/open-source.svg)](https://forthebadge.com)
-
+</p>
 TOME is a multi-user text engine designed to be used with traditional mud clients
 
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
