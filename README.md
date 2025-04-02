@@ -1,7 +1,7 @@
 <div align="center">
   <br>
   <h1>Tome MUD</h1>
-  <strong>For creating 🌟Amazing🌟 Muds </strong>
+  <strong>For creating 🌟Amazing🌟 MUD/MUX/MUSH/MU* </strong>
   <br><br>
   <a href="https://python.org">
     <img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with Python">
@@ -13,8 +13,7 @@
 
 TOME is a multi-user text engine designed to be used with traditional mud clients.
 
-Shield:
-[![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
+Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
 This work is licensed under a
 [Creative Commons Attribution-NonCommercial 4.0 International License][cc-by-nc].
