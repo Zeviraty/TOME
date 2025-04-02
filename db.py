@@ -6,13 +6,15 @@ import click
 @click.command()
 def full_init() -> None:
     click.echo("Creating directories...")
-    os.makedirs("db")
-    os.makedirs("db/backups")
-    os.makedirs("db/schemas")
+    for i in ["db","db/schemas","db/backups"]:
+        if not os.path.exists(i):
+            click.echo(f"Creating {i}...")
+            os.makedirs(i)
+            click.echo(f"Created {i}")
     click.echo("Done creating directories!")
 
     click.echo("Creating database...")
-    init(False,True)
+    init_db(False)
     click.echo("Created database!")
 
     click.echo("Fully initialized the database!")
@@ -36,13 +38,19 @@ def revert(date):
     shutil.copy(f"db/backups/{date}","db/database.db")
 
 @click.command()
-def init(dobackup=True,noecho=False):
+def init():
+    click.echo("Creating database...")
+    init_db()
+    click.echo("Created database!")
+
+def init_db(dobackup=True):
     if dobackup:
         backup_db()
 
-    if not noecho:
-        click.echo('Initialized the database')
-
+    schemas = os.listdir("db/schemas")
+    for schema in schemas:
+        conn = get()
+        conn.execute(open(f"db/schemas/{schema}",'r').read())
 
 @click.group()
 def cli():
