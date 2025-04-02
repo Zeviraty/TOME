@@ -3,7 +3,7 @@
   <h1>Tome MUD</h1>
   <strong>For creating 🌟Amazing🌟 Muds </strong>
   <br><br>
-  <a href="https://forthebadge.com">
+  <a href="https://python.org">
     <img src="https://forthebadge.com/images/badges/made-with-python.svg" alt="Made with Python">
   </a>
   <a href="https://forthebadge.com">
