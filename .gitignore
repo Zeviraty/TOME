@@ -176,3 +176,5 @@ db/backups
 db/database.db
 
 bin
+
+lib64
