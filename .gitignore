@@ -178,3 +178,5 @@ db/database.db
 bin
 
 lib64
+
+pyvenv.cfg
