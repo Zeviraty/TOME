@@ -174,3 +174,5 @@ cython_debug/
 .pypirc
 db/backups
 db/database.db
+
+bin
