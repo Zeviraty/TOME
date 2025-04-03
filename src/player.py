@@ -11,8 +11,8 @@ class Player:
     def __init__(self, client: socket.socket, addr:tuple):
         self.client = client
         self.addr = addr
-        self.x =
-        self.y =
+        self.x = 0
+        self.y = 0
 
     def bsend(self,content: bytes):
         try:

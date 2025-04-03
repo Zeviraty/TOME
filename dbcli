@@ -1,1 +1,1 @@
-python db.py $@
+python src/db.py $@
