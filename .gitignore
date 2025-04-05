@@ -182,3 +182,7 @@ bin
 lib64
 pyvenv.cfg
 include
+
+run
+clean
+dbcli
