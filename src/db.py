@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 import shutil,os
+from typing import final
 import click
 
 @click.command()
@@ -39,18 +40,42 @@ def revert(date):
 
 @click.command()
 def init():
-    click.echo("Creating database...")
-    init_db()
-    click.echo("Created database!")
+    click.echo("Initializing database...")
+    init_db(True,True)
+    click.echo("Initialized database!")
 
-def init_db(dobackup=True):
+def init_db(dobackup=True, clickecho=False):
     if dobackup:
         backup_db()
 
-    schemas = os.listdir("db/schemas")
-    for schema in schemas:
-        conn = get()
-        conn.execute(open(f"db/schemas/{schema}",'r').read())
+    for root, _, files in os.walk("db/schemas"):
+        dirname = os.path.basename(root)
+
+        for schema in files:
+            schema_name = schema.replace(".sql", "")
+            schema_path = os.path.join(root, schema)
+            display_name = f"{dirname}.{schema_name}" if dirname != "schemas" else schema_name
+
+            conn = get()
+            message = f"Executing {display_name}... "
+
+            if clickecho:
+                click.echo(message, nl=False)
+            else:
+                print(message, end="")
+
+            try:
+                with open(schema_path, 'r') as file:
+                    conn.execute(file.read())
+            except Exception:
+                status = "\033[0;31mFailed\033[0m"
+            else:
+                status = "\033[0;32mOk\033[0m"
+
+            if clickecho:
+                click.echo(status)
+            else:
+                print(status)
 
 @click.group()
 def cli():
