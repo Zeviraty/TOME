@@ -1,3 +1,4 @@
+import os
 import socket
 import threading
 from player import Player
@@ -16,6 +17,7 @@ def main():
             print(f"[+] {addr[0]}:{addr[1]} broke pipe" )
 
 if __name__ == "__main__":
+    os.mkdir("logs")
     bind_ip = "0.0.0.0"
     bind_port = 2323
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
