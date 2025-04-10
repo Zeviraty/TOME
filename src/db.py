@@ -1,7 +1,6 @@
 import sqlite3
 from datetime import datetime
 import shutil,os
-from typing import final
 import click
 
 @click.command()
@@ -27,6 +26,24 @@ def backup_db():
 def get() -> sqlite3.Connection:
     return sqlite3.connect('db/database.db')
 
+def get_latest_backup():
+    datetime_format = "%d-%m-%Y_%H-%M-%S"
+    backups = []
+
+    for filename in os.listdir("db/backups"):
+        if filename.endswith(".db"):
+            dt_str = filename[:-3]
+            try:
+                dt = datetime.strptime(dt_str, datetime_format)
+                backups.append((dt, filename))
+            except ValueError:
+                continue
+
+    if not backups:
+        return None
+
+    return max(backups)[1]
+
 @click.command()
 def backup():
     click.echo("Starting backup...")
@@ -36,7 +53,25 @@ def backup():
 @click.command()
 @click.argument('date')
 def revert(date):
-    shutil.copy(f"db/backups/{date}","db/database.db")
+    dobackup = input("Do you want to backup now? Y/n: ")
+
+    last = get_latest_backup()
+
+    if dobackup.lower() != "n":
+        backup_db()
+
+    if date == "last":
+        if last == None:
+            print("No last backup")
+            return
+        shutil.copy(f"db/backups/{last}","db/database.db")
+        print(f"reverted to: {last}")
+    else:
+        if os.path.exists(f"db/backups/{date}"):
+            shutil.copy(f"db/backups/{date}","db/database.db")
+            print(f"reverted to: {date}")
+        else:
+            print("No backup from that date")
 
 @click.command()
 def init():
@@ -66,9 +101,9 @@ def init_db(dobackup=True, clickecho=False):
 
             try:
                 with open(schema_path, 'r') as file:
-                    conn.execute(file.read())
-            except Exception:
-                status = "\033[0;31mFailed\033[0m"
+                    conn.executescript(file.read())
+            except Exception as e:
+                status = "\033[0;31mFailed\033[0m\n" + str(e)
             else:
                 status = "\033[0;32mOk\033[0m"
 

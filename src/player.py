@@ -35,6 +35,3 @@ class Player:
         except BrokenPipeError:
             print("[+] broke pipe")
             exit(0)
-
-
-

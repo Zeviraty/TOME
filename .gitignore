@@ -186,3 +186,4 @@ include
 run
 clean
 dbcli
+logs/
