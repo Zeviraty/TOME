@@ -1,10 +1,15 @@
-import os
 import socket
 import threading
+import banners
 from player import Player
+
+clients: list[Player] = []
 
 def handle_client(client_socket, addr):
     client = Player(client_socket, addr)
+    clients.append(client)
+    client.send(banners.generate("TOME"))
+    client.send("Welcome to TOME!")
 
 def main():
     while True:
@@ -27,4 +32,6 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        pass
+        print("Closing server...")
+        for client in clients:
+            client.disconnect("Server closed by admin.")

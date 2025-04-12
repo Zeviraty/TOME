@@ -8,30 +8,34 @@ SE   = bytes([240])
 WILL = bytes([251])
 
 class Player:
-    def __init__(self, client: socket.socket, addr:tuple):
+    def __init__(self, client: socket.socket, addr: tuple):
         self.client = client
         self.addr = addr
         self.x = 0
         self.y = 0
 
-    def bsend(self,content: bytes):
+    def bsend(self, content: bytes):
         try:
             self.client.send(content)
         except BrokenPipeError:
             print("[+] broke pipe")
             exit(0)
 
-    def gmcpsend(self,content=""):
+    def gmcpsend(self, content: str = ""):
         try:
             self.client.send(IAC + SB + GMCP + content.encode() + IAC + SE, socket.MSG_OOB)
         except BrokenPipeError:
             print("[+] broke pipe")
             exit(0)
 
-    def send(self,content="",lines=0):
+    def send(self, content: str = "", lines=0):
         try:
             sending = ("\n"*lines)+content+"\n"
             self.client.send(sending.encode())
         except BrokenPipeError:
             print("[+] broke pipe")
             exit(0)
+
+    def disconnect(self, message: str):
+        self.send(f"Disconnected: {message}")
+        self.client.close()
