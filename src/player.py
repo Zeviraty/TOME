@@ -1,41 +1,276 @@
-import socket, requests
-import sqlite3
+import socket
+import json
+import threading
+import db
+import hashlib
 
-IAC  = bytes([255])
-SB   = bytes([250])
-GMCP = bytes([201])
-SE   = bytes([240])
-WILL = bytes([251])
+TELNET_COMMANDS = {
+    # Telnet command bytes (RFC 854)
+    "IAC": bytes([255]),   # Interpret As Command
+    "DONT": bytes([254]),
+    "DO": bytes([253]),
+    "WONT": bytes([252]),
+    "WILL": bytes([251]),
+    "SB": bytes([250]),    # Subnegotiation Begin
+    "GA": bytes([249]),
+    "EL": bytes([248]),
+    "EC": bytes([247]),
+    "AYT": bytes([246]),
+    "AO": bytes([245]),
+    "IP": bytes([244]),
+    "BREAK": bytes([243]),
+    "DM": bytes([242]),
+    "NOP": bytes([241]),
+    "SE": bytes([240]),    # Subnegotiation End
+
+    # Telnet options (partial list, per IANA assignments)
+    "BINARY": bytes([0]),
+    "ECHO": bytes([1]),
+    "SUPPRESS_GO_AHEAD": bytes([3]),
+    "STATUS": bytes([5]),
+    "TIMING_MARK": bytes([6]),
+    "TERMINAL_TYPE": bytes([24]),
+    "NAWS": bytes([31]),   # Negotiate About Window Size
+    "TERMINAL_SPEED": bytes([32]),
+    "REMOTE_FLOW_CONTROL": bytes([33]),
+    "LINEMODE": bytes([34]),
+    "ENVIRON": bytes([36]),
+
+    # Common MUD extensions
+    "GMCP": bytes([201]),  # Generic Mud Communication Protocol (community-defined)
+}
+
+INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
 
 class Player:
-    def __init__(self, client: socket.socket, addr: tuple):
+    def __init__(self, client: socket.socket, addr: tuple, id: int) -> None:
         self.client = client
         self.addr = addr
         self.x = 0
         self.y = 0
+        self.gmcp = False
+        self.mudclient = None
+        self.id = id
+        self.disconnected = False
+        self._disconnect_lock = threading.Lock()
 
-    def bsend(self, content: bytes):
+    def login(self, gmcp:bool = True) -> None:
+        if gmcp:
+            self.gmcpsend("IAC WILL GMCP")
+            gmcp_response = self.getgmcp()
+            if "gmcp" in gmcp_response.keys():
+                self.gmcp = gmcp_response["gmcp"]
+            if "Core.Hello" in gmcp_response.keys():
+                self.mudclient = gmcp_response["Core.Hello"]
+
+        username = self.input("Username:")
+        conn = db.get()
+        names = conn.execute("SELECT name FROM accounts WHERE name = ?;",(username,)).fetchall()
+        if names:
+            password = self.input("Password: ")
+        else:
+            create = self.yn("Account does not exist, do you want to create it? ",preferred_option="n")
+            if create:
+                while True:
+                    password = self.input("Password: ")
+                    if password == self.input("Confirm password: "):
+                        break
+                    else:
+                        self.send("Passwords do not match.")
+                conn.execute("INSERT INTO accounts (name, password) VALUES (?, ?)",
+                    (
+                        username,
+                        str(hashlib.sha256(password.encode()))
+                    )
+                )
+                conn.commit()
+                conn.close()
+            self.login(False)
+
+
+    def get(self) -> bytes:
+        if self.disconnected:
+            return b""
+        try:
+            return self.client.recv(2048)
+        except (BrokenPipeError, OSError):
+            self.disconnected = True
+            return b""
+
+    def yn(self,question:str,preferred_option="y") -> bool:
+        try:
+            preferred_option = preferred_option.lower()
+            if preferred_option != "n":
+                self.send(question + "(Y/n): ")
+            else:
+                self.send(question + "(y/N): ")
+            response = self.get()
+            if preferred_option == "n":
+                if response in ("yes","1","y"):
+                    return True
+                else:
+                    return True
+            else:
+                if response in ("no","2","n"):
+                    return False
+                else:
+                    return True
+        except BrokenPipeError:
+            print(f"[{self.id}] broke pipe")
+            exit(0)
+
+    def input(self, message:str="") -> str:
+        try:
+            self.send(message)
+            return self.get().decode()
+        except BrokenPipeError:
+            print(f"[{self.id}] broke pipe")
+            exit(0)
+
+    def binput(self,message:str="") -> bytes:
+        try:
+            self.send(message)
+            return self.get()
+        except BrokenPipeError:
+            print(f"[{self.id}] broke pipe")
+            exit(0)
+
+    def tinput(self, message: str = "", typed: type = str) -> str | bool:
+        if self.disconnected:
+            return False
+        try:
+            return typed(self.input(message))
+        except:
+            if not self.disconnected:
+                print(f"[{self.id}] Could not type input")
+            return False
+
+    def ltinput(self, message: str = "", typed: type = str, wrongmsg: str = "You needed to input a str."):
+        while not self.disconnected:
+            inp = self.tinput(message, typed)
+            if inp is not False:
+                return inp
+            elif not self.disconnected:
+                self.send(wrongmsg)
+        return None
+
+    def getgmcp(self) -> dict:
+        data = self.get()
+        gmcp_data = {}
+        telnet_log = []
+
+        i = 0
+        while i < len(data):
+            byte = data[i]
+
+            if byte == TELNET_COMMANDS["IAC"][0]:
+                i += 1
+                if i >= len(data): break
+
+                cmd = data[i]
+                cmd_byte = bytes([cmd])
+                cmd_name = INVERSE_TELNET.get(cmd_byte, f"UNKNOWN({cmd})")
+
+                # Handle subnegotiation: IAC SB GMCP ... IAC SE
+                if cmd == TELNET_COMMANDS["SB"][0] and i + 1 < len(data) and data[i + 1] == TELNET_COMMANDS["GMCP"][0]:
+                    i += 2  # Skip SB and GMCP
+                    start = i
+                    while i < len(data) - 1:
+                        if data[i] == TELNET_COMMANDS["IAC"][0] and data[i + 1] == TELNET_COMMANDS["SE"][0]:
+                            payload = data[start:i].decode(errors="ignore")
+                            if " " in payload:
+                                key, value = payload.split(" ", 1)
+                                try:
+                                    gmcp_data[key] = json.loads(value)
+                                except json.JSONDecodeError:
+                                    gmcp_data[key] = value
+                            else:
+                                gmcp_data[payload] = None
+                            telnet_log.append(f"IAC SB GMCP {payload} IAC SE")
+                            i += 2  # Skip IAC SE
+                            break
+                        i += 1
+                    continue
+
+                # Handle WILL/WONT GMCP
+                elif cmd in [TELNET_COMMANDS["WILL"][0], TELNET_COMMANDS["WONT"][0], TELNET_COMMANDS["DO"][0], TELNET_COMMANDS["DONT"][0]] and i + 1 < len(data):
+                    option = data[i + 1]
+                    if option == TELNET_COMMANDS["GMCP"][0]:
+                        gmcp_data["gmcp"] = (cmd == TELNET_COMMANDS["WILL"][0] or cmd == TELNET_COMMANDS["DO"][0])
+                        telnet_log.append(f"IAC {cmd_name} GMCP")
+                        i += 2
+                        continue
+                    else:
+                        option_name = INVERSE_TELNET.get(bytes([option]), f"UNKNOWN({option})")
+                        telnet_log.append(f"IAC {cmd_name} {option_name}")
+                        i += 2
+                        continue
+
+                # Handle other commands with options (e.g., DO NAWS)
+                elif i + 1 < len(data):
+                    option = data[i + 1]
+                    option_name = INVERSE_TELNET.get(bytes([option]), f"UNKNOWN({option})")
+                    telnet_log.append(f"IAC {cmd_name} {option_name}")
+                    i += 2
+                    continue
+
+                else:
+                    telnet_log.append(f"IAC {cmd_name}")
+                    i += 1
+
+            else:
+                telnet_log.append(str(byte))
+                i += 1
+
+        if telnet_log:
+            gmcp_data["telnet"] = telnet_log
+
+        return gmcp_data
+
+
+    def bsend(self, content: bytes) -> None:
         try:
             self.client.send(content)
         except BrokenPipeError:
-            print("[+] broke pipe")
+            print(f"[{self.id}] broke pipe")
             exit(0)
 
-    def gmcpsend(self, content: str = ""):
+    def gmcpsend(self, content: str = "") -> None:
+        message: bytes = b""
+        for i in content.split(" "):
+            if i in TELNET_COMMANDS.keys():
+                message += TELNET_COMMANDS[i]
+            else:
+                message += i.encode()
         try:
-            self.client.send(IAC + SB + GMCP + content.encode() + IAC + SE, socket.MSG_OOB)
+            self.client.send(message)
         except BrokenPipeError:
-            print("[+] broke pipe")
+            print(f"[{self.id}] broke pipe")
             exit(0)
 
-    def send(self, content: str = "", lines=0):
+    def send(self, content: str = "", lines=0) -> None:
         try:
             sending = ("\n"*lines)+content+"\n"
             self.client.send(sending.encode())
         except BrokenPipeError:
-            print("[+] broke pipe")
+            print(f"[{self.id}] broke pipe")
             exit(0)
 
-    def disconnect(self, message: str):
-        self.send(f"Disconnected: {message}")
-        self.client.close()
+    def disconnect(self, message: str = "Disconnected.") -> None:
+        with self._disconnect_lock:
+            if self.disconnected:
+                return
+            self.disconnected = True
+            try:
+                self.send(f"Disconnected: {message}")
+            except:
+                pass
+            try:
+                self.client.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
+            try:
+                self.client.close()
+            except:
+                pass
+            print(f"[{self.id}] Disconnected: {message}")

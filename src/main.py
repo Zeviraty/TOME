@@ -4,18 +4,23 @@ import banners
 from player import Player
 
 clients: list[Player] = []
+global id
+id = 0
 
-def handle_client(client_socket, addr):
-    client = Player(client_socket, addr)
+def handle_client(client_socket, addr, id):
+    client = Player(client_socket, addr, id)
     clients.append(client)
     client.send(banners.generate("TOME"))
     client.send("Welcome to TOME!")
+    client.login()
 
 def main():
+    global id
     while True:
         client, addr = server.accept()
-        print(f"[+] Accepted connection from: {addr[0]}:{addr[1]}")
-        client_handler = threading.Thread(target=handle_client, args=(client,addr))
+        print(f"[+] Accepted connection from: {addr[0]}:{addr[1]} id: {id + 1}")
+        id += 1
+        client_handler = threading.Thread(target=handle_client, args=(client,addr,id))
         try:
             client_handler.start()
         except BrokenPipeError:
