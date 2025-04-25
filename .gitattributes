@@ -1,2 +1,4 @@
 *.sql linguist-language=SQL
 *.sql linguist-detectable=true
+*.md linguist-language=MarkDown
+*.md linguist-detectable=true
