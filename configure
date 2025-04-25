@@ -31,13 +31,12 @@ if ! command -v make >/dev/null 2>&1; then
     exit 1
 fi
 
-
 echo "All requirements for setup are present."
 
 echo ""
 echo "Now you can run:"
 echo "  make install    # to set up the environment"
-echo "  make run        # to start the MUD"
+echo "  make run        # to run TOME"
 echo "  make clean      # to clear logs and caches"
 echo "  make genreqs    # to regenerate requirements.txt"
 

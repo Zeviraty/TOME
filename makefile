@@ -35,20 +35,21 @@ dist:
 
 distcheck:
 	@echo "Creating source distribution package..."
-	# Create a tarball (source package)
-	make dist
+	# Run the dist target first to create the tarball
+	make dist || { echo "Error: Failed to create the distribution package"; exit 1; }
 
 	# Extract the distribution into a temporary directory
 	mkdir -p tmp-distcheck
-	tar -xzf your_project_name.tar.gz -C tmp-distcheck
+	tar -xzf TOME.tar.gz -C tmp-distcheck
 
 	# Change into the directory and run ./configure (or similar setup)
-	cd tmp-distcheck/your_project_name && ./configure && make
+	cd tmp-distcheck/TOME && ./configure && make
 
 	# Optionally, run tests here (if you have any)
-	cd tmp-distcheck/your_project_name && make check
+	cd tmp-distcheck/TOME && make check
 
 	# Clean up the temporary directory
 	rm -rf tmp-distcheck
 
 	@echo "distcheck completed successfully!"
+
