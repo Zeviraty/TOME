@@ -1,0 +1,38 @@
+#!/bin/sh
+
+echo "Configuring your MUD application..."
+
+# Check for python
+if ! command -v python >/dev/null 2>&1; then
+    echo "Error: Python is not installed or not in your PATH."
+    exit 1
+fi
+
+# Check Python version
+PYTHON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+echo "Found Python $PYTHON_VERSION"
+
+# Check pip
+if ! command -v pip >/dev/null 2>&1; then
+    echo "Error: pip is not installed."
+    exit 1
+fi
+
+# Check for pipreqs
+if ! pip show pipreqs >/dev/null 2>&1; then
+    echo "pipreqs not found, installing it now..."
+    pip install --user pipreqs
+    echo "Make sure your ~/.local/bin is in your PATH if 'pipreqs' can't be found."
+fi
+
+echo "All requirements for setup are present."
+
+echo ""
+echo "Now you can run:"
+echo "  make install    # to set up the environment"
+echo "  make run        # to start the MUD"
+echo "  make clean      # to clear logs and caches"
+echo "  make genreqs    # to regenerate requirements.txt"
+
+exit 0
+
