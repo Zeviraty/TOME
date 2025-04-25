@@ -32,7 +32,7 @@ check:
 dist:
 	rm -f TOME.tar.gz
 	mkdir -p dist-temp
-	rsync -a --exclude .git --exclude *.pyc --exclude __pycache__ . dist-temp/
+	find . -type f ! -name '*.pyc' ! -path './__pycache__/*' ! -path './.git/*' -exec cp --parents {} dist-temp/ \;
 	tar -czf TOME.tar.gz -C dist-temp .
 	rm -rf dist-temp
 
