@@ -43,8 +43,8 @@ distcheck:
 	mkdir -p tmp-distcheck
 	tar -xzf TOME.tar.gz -C tmp-distcheck
 
-	cd tmp-distcheck/TOME && ./configure && make
-	cd tmp-distcheck/TOME && make check
+	cd tmp-distcheck/ && ./configure && make
+	cd tmp-distcheck/ && make check
 
 	rm -rf tmp-distcheck
 
