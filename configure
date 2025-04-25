@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Configuring your MUD application..."
+echo "Configuring TOME..."
 
 # Check for python
 if ! command -v python >/dev/null 2>&1; then
@@ -24,6 +24,13 @@ if ! pip show pipreqs >/dev/null 2>&1; then
     pip install --user pipreqs
     echo "Make sure your ~/.local/bin is in your PATH if 'pipreqs' can't be found."
 fi
+
+# Check if make is installed
+if ! command -v make >/dev/null 2>&1; then
+    echo "Error: make is not installed or not in your PATH."
+    exit 1
+fi
+
 
 echo "All requirements for setup are present."
 

@@ -24,12 +24,13 @@ genreqs:
 
 check:
 	@echo "Running checks..."
-	python -m py_compile $$(find src -name '*.py') || { echo 'Syntax errors found.'; exit 1; }
-	test -f requirements.txt || { echo 'Missing requirements.txt'; exit 1; }
-	test -d src || { echo 'Missing src/ directory'; exit 1; }
+	@python -m py_compile $$(find src -name '*.py') || { echo 'Syntax errors found.'; exit 1; }
+	@test -f requirements.txt || { echo 'Missing requirements.txt'; exit 1; }
+	@test -d src || { echo 'Missing src/ directory'; exit 1; }
 	@echo "All checks passed!"
 
 dist:
+	rm -f TOME.tar.gz
 	tar -czf TOME.tar.gz --exclude=.git --exclude=*.pyc --exclude=__pycache__ .
 
 distcheck:
