@@ -34,6 +34,9 @@ def resolve_schema_path(schema_name, base_path="db/schemas", ext=".sql"):
 
 @cli.command()
 def full_init() -> None:
+    yn = input("This is destructive do you want to do this? (y/N): ")
+    if yn.lower() != "y":
+        return
     click.echo("Creating directories...")
     backup_db()
     if os.path.exists("db/database.db"):
@@ -146,12 +149,16 @@ def init_db(dobackup=True, clickecho=False):
     for root, _, files in os.walk("db/schemas"):
         dirname = os.path.basename(root)
 
+        files.sort()
+
         for schema in files:
             schema_name = schema.replace(".sql", "")
             schema_path = "db/schemas/"+dirname+"/"+schema_name+".sql"
             display_name = f"{dirname}.{schema_name}" if dirname != "schemas" else schema_name
 
             if display_name in applied:
+                continue
+            if schema.endswith(".down.sql"):
                 continue
 
             conn = get()
@@ -257,7 +264,10 @@ def new(schema, name):
     for path in [up_path, down_path]:
         if not os.path.exists(path):
             with open(path, "w") as f:
-                f.write(f"-- {schema}.{name} migration\n")
+                if path.endswith(".down.sql"):
+                    f.write(f"-- {schema}.{name}.down migration\n")
+                else:
+                    f.write(f"-- {schema}.{name} migration\n")
             click.echo(f"Created {path}")
         else:
             click.echo(f"File {path} already exists.")
@@ -338,6 +348,7 @@ def apply_all():
 
     all_files = []
     for root, _, files in os.walk("db/schemas"):
+        files.sort()
         for file in files:
             if file.endswith(".sql") and not file.endswith(".down.sql"):
                 rel = os.path.relpath(os.path.join(root, file), "db/schemas")
@@ -348,7 +359,7 @@ def apply_all():
 
     for schema, path in all_files:
         if schema not in applied:
-            click.echo(f"Applying {schema}...")
+            #click.echo(f"Applying {schema}...")
             ctx = click.get_current_context()
             ctx.invoke(apply, schema=schema)
 

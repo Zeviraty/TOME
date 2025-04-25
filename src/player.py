@@ -53,6 +53,9 @@ class Player:
         self.id = id
         self.disconnected = False
         self._disconnect_lock = threading.Lock()
+        self.username = None
+        self.user = None
+        self.td = id
 
     def login(self, gmcp:bool = True) -> None:
         if gmcp:
@@ -63,32 +66,67 @@ class Player:
             if "Core.Hello" in gmcp_response.keys():
                 self.mudclient = gmcp_response["Core.Hello"]
 
-        username = self.input("Username:")
+        username = self.input("Username:").lower()
         conn = db.get()
-        names = conn.execute("SELECT name FROM accounts WHERE name = ?;",(username,)).fetchall()
-        if names:
+        passwords = conn.execute("SELECT password FROM accounts WHERE name = ?;",(username,)).fetchone()
+
+        if passwords:
+            self.gmcpsend("IAC WILL ECHO")
+            self.getgmcp()
+
             password = self.input("Password: ")
+
+            self.gmcpsend("IAC WONT ECHO")
+            self.getgmcp()
+
+            if str(hashlib.sha256(password.encode()).digest()) == passwords[0]:
+                self.send(f"Logged in as: {username}.")
+                self.username = username
+                self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
+                print(f"[{self.td}] Logged in as: {self.username}")
+                self.td = self.username
+            else:
+                self.send("Wrong password.")
+                self.login(False)
+
         else:
             create = self.yn("Account does not exist, do you want to create it? ",preferred_option="n")
             if create:
+                self.gmcpsend("IAC WILL ECHO")
+                self.getgmcp()
+
                 while True:
                     password = self.input("Password: ")
                     if password == self.input("Confirm password: "):
                         break
                     else:
                         self.send("Passwords do not match.")
+
                 conn.execute("INSERT INTO accounts (name, password) VALUES (?, ?)",
                     (
                         username,
-                        str(hashlib.sha256(password.encode()))
+                        str(hashlib.sha256(password.encode()).digest())
                     )
                 )
+
                 conn.commit()
                 conn.close()
+
+                self.gmcpsend("IAC WONT ECHO")
+                self.getgmcp()
+
             self.login(False)
 
+    def get(self) -> str:
+        if self.disconnected:
+            return ""
+        try:
+            return self.client.recv(2048).decode().strip()
+        except (BrokenPipeError, OSError):
+            self.disconnected = True
+            return ""
 
-    def get(self) -> bytes:
+    def bget(self) -> bytes:
         if self.disconnected:
             return b""
         try:
@@ -109,30 +147,30 @@ class Player:
                 if response in ("yes","1","y"):
                     return True
                 else:
-                    return True
+                    return False
             else:
                 if response in ("no","2","n"):
                     return False
                 else:
                     return True
         except BrokenPipeError:
-            print(f"[{self.id}] broke pipe")
+            print(f"[{self.td}] broke pipe")
             exit(0)
 
     def input(self, message:str="") -> str:
         try:
             self.send(message)
-            return self.get().decode()
+            return self.get()
         except BrokenPipeError:
-            print(f"[{self.id}] broke pipe")
+            print(f"[{self.td}] broke pipe")
             exit(0)
 
     def binput(self,message:str="") -> bytes:
         try:
             self.send(message)
-            return self.get()
+            return self.bget()
         except BrokenPipeError:
-            print(f"[{self.id}] broke pipe")
+            print(f"[{self.td}] broke pipe")
             exit(0)
 
     def tinput(self, message: str = "", typed: type = str) -> str | bool:
@@ -142,7 +180,7 @@ class Player:
             return typed(self.input(message))
         except:
             if not self.disconnected:
-                print(f"[{self.id}] Could not type input")
+                print(f"[{self.td}] Could not type input")
             return False
 
     def ltinput(self, message: str = "", typed: type = str, wrongmsg: str = "You needed to input a str."):
@@ -155,7 +193,7 @@ class Player:
         return None
 
     def getgmcp(self) -> dict:
-        data = self.get()
+        data = self.bget()
         gmcp_data = {}
         telnet_log = []
 
@@ -232,7 +270,7 @@ class Player:
         try:
             self.client.send(content)
         except BrokenPipeError:
-            print(f"[{self.id}] broke pipe")
+            print(f"[{self.td}] broke pipe")
             exit(0)
 
     def gmcpsend(self, content: str = "") -> None:
@@ -245,7 +283,7 @@ class Player:
         try:
             self.client.send(message)
         except BrokenPipeError:
-            print(f"[{self.id}] broke pipe")
+            print(f"[{self.td}] broke pipe")
             exit(0)
 
     def send(self, content: str = "", lines=0) -> None:
@@ -253,7 +291,7 @@ class Player:
             sending = ("\n"*lines)+content+"\n"
             self.client.send(sending.encode())
         except BrokenPipeError:
-            print(f"[{self.id}] broke pipe")
+            print(f"[{self.td}] broke pipe")
             exit(0)
 
     def disconnect(self, message: str = "Disconnected.") -> None:
@@ -273,4 +311,4 @@ class Player:
                 self.client.close()
             except:
                 pass
-            print(f"[{self.id}] Disconnected: {message}")
+            print(f"[{self.td}] Disconnected: {message}")
