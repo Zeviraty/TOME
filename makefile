@@ -31,24 +31,21 @@ check:
 
 dist:
 	rm -f TOME.tar.gz
-	tar -czf TOME.tar.gz --exclude=.git --exclude=*.pyc --exclude=__pycache__ .
+	mkdir -p dist-temp
+	rsync -a --exclude .git --exclude *.pyc --exclude __pycache__ . dist-temp/
+	tar -czf TOME.tar.gz -C dist-temp .
+	rm -rf dist-temp
 
 distcheck:
 	@echo "Creating source distribution package..."
-	# Run the dist target first to create the tarball
 	make dist || { echo "Error: Failed to create the distribution package"; exit 1; }
 
-	# Extract the distribution into a temporary directory
 	mkdir -p tmp-distcheck
 	tar -xzf TOME.tar.gz -C tmp-distcheck
 
-	# Change into the directory and run ./configure (or similar setup)
 	cd tmp-distcheck/TOME && ./configure && make
-
-	# Optionally, run tests here (if you have any)
 	cd tmp-distcheck/TOME && make check
 
-	# Clean up the temporary directory
 	rm -rf tmp-distcheck
 
 	@echo "distcheck completed successfully!"
