@@ -1,18 +1,29 @@
 import socket
 import threading
 import banners
-from player import Player
+from player import Player,COLORS
+import db
 
 clients: list[Player] = []
 global id
 id = 0
 
+DEBUG = True
+
 def handle_client(client_socket, addr, id):
     client = Player(client_socket, addr, id)
     clients.append(client)
+    client.send(COLORS["BLACK"].bg())
+    client.send(COLORS["WHITE"].fg())
     client.send(banners.generate("TOME"))
-    client.send("Welcome to TOME!")
-    client.login()
+    client.send("Welcome to TOME!\n")
+    if not DEBUG:
+        client.login()
+    else:
+        conn = db.get()
+        client.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",("zeviraty",)).fetchone()
+        client.username = "Zeviraty"
+    client.mainmenu()
 
 def main():
     global id

@@ -3,6 +3,7 @@ import json
 import threading
 import db
 import hashlib
+from map import Color
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -41,21 +42,105 @@ TELNET_COMMANDS = {
 }
 
 INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
+COLORS = {
+    "YELLOW": Color(11),
+    "CYAN": Color(14),
+    "BLUE": Color(4),
+    "WHITE": Color(15),
+    "BLACK": Color(0),
+    "RESET": Color(15).fg() + Color(0).bg(),
+    "DARK_YELLOW": Color(3),
+}
 
 class Player:
     def __init__(self, client: socket.socket, addr: tuple, id: int) -> None:
-        self.client = client
-        self.addr = addr
-        self.x = 0
-        self.y = 0
-        self.gmcp = False
-        self.mudclient = None
-        self.id = id
-        self.disconnected = False
+        self.client: socket.socket = client
+        self.addr: tuple = addr
+        self.x: int = 0
+        self.y: int = 0
+        self.gmcp: bool = False
+        self.mudclient: None | list = None
+        self.id: int = id
+        self.disconnected: bool = False
         self._disconnect_lock = threading.Lock()
-        self.username = None
-        self.user = None
-        self.td = id
+        self.username: None | str = None
+        self.user: None | tuple = None
+        self.td: int | str = id
+        self.privileges: list = []
+        self.character: dict = {}
+
+    def mainmenu(self):
+        while True:
+            selected = self.menu(
+                [
+                    "New character",
+                    "List characters",
+                    "Exit",
+                ],
+                "Main Menu",
+                "Command or Name of character: ",
+                True,
+            )
+            conn = db.get()
+            match selected:
+                case 0:
+                    self.send("New character\n")
+                    classes = [
+                            "Paladin",
+                            "Fighter",
+                            "Rogue",
+                            "Mage",
+                            "Sorcerer",
+                            "Cleric",
+                            "Monk",
+                            "Warlock",
+                            "Barbarian",
+                            "Bard",
+                            "Druid",
+                            "Ranger",
+                        ]
+                    classes.sort()
+                    character_class = self.menu(
+                        classes,
+                        "Class",
+                    )
+                    character_class = classes[int(character_class)]
+
+                    self.character["Class"] = character_class
+
+                    break
+                case 1:
+                    self.send("")
+                    characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],))
+                    for character in characters:
+                        self.send(character)
+                case 2:
+                    self.disconnect("You chose to exit this realm.")
+                    break
+                case _:
+                    if selected in conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],)):
+                        break
+                    else:
+                        self.send("Not the name of a character or a command.")
+
+    def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False):
+        menu = " " + COLORS["YELLOW"].apply(COLORS["BLUE"].apply(f'{name}:\n',bg=True))
+        for idx,i in enumerate(options):
+            menu += f" {COLORS["BLUE"].apply(COLORS["YELLOW"].apply(str(idx)),bg=True)}) {COLORS["CYAN"].apply(i)}\n"
+        self.send(menu)
+        while True:
+            recv = self.input(input_string)
+            try:
+                recv = int(recv)
+            except:
+                pass
+            if recv in options or (type(recv) == int and recv in range(len(options))):
+                if type(recv) == int:
+                    return recv
+                else:
+                    return options.index(str(recv))
+            elif other_options == True:
+                return recv
 
     def login(self, gmcp:bool = True) -> None:
         if gmcp:
@@ -71,20 +156,17 @@ class Player:
         passwords = conn.execute("SELECT password FROM accounts WHERE name = ?;",(username,)).fetchone()
 
         if passwords:
-            self.gmcpsend("IAC WILL ECHO")
-            self.getgmcp()
-
-            password = self.input("Password: ")
-
-            self.gmcpsend("IAC WONT ECHO")
-            self.getgmcp()
+            password = self.input("Password: ",echo=False)
 
             if str(hashlib.sha256(password.encode()).digest()) == passwords[0]:
-                self.send(f"Logged in as: {username}.")
+                self.send(f"Logged in as: {username}.\n")
                 self.username = username
                 self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
                 print(f"[{self.td}] Logged in as: {self.username}")
                 self.td = self.username
+                privileges = conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(self.user[0],)).fetchall()
+                for i in privileges:
+                    self.privileges.append(i[0])
             else:
                 self.send("Wrong password.")
                 self.login(False)
@@ -92,12 +174,9 @@ class Player:
         else:
             create = self.yn("Account does not exist, do you want to create it? ",preferred_option="n")
             if create:
-                self.gmcpsend("IAC WILL ECHO")
-                self.getgmcp()
-
                 while True:
-                    password = self.input("Password: ")
-                    if password == self.input("Confirm password: "):
+                    password = self.input("Password: ",echo=False)
+                    if password == self.input("Confirm password: ",echo=False):
                         break
                     else:
                         self.send("Passwords do not match.")
@@ -111,9 +190,6 @@ class Player:
 
                 conn.commit()
                 conn.close()
-
-                self.gmcpsend("IAC WONT ECHO")
-                self.getgmcp()
 
             self.login(False)
 
@@ -157,10 +233,21 @@ class Player:
             print(f"[{self.td}] broke pipe")
             exit(0)
 
-    def input(self, message:str="") -> str:
+    def input(self, message:str="", echo:bool=True) -> str:
         try:
-            self.send(message)
-            return self.get()
+            message = message.strip().replace("\n","")
+            self.gmcpsend("IAC WILL ECHO")
+            self.getgmcp()
+
+            self.send(message,end="")
+            response = self.get().replace("\n","")
+
+            if echo == True:
+                self.send(COLORS["DARK_YELLOW"].apply(response).strip())
+
+            self.gmcpsend("IAC WONT ECHO")
+            self.getgmcp()
+            return response
         except BrokenPipeError:
             print(f"[{self.td}] broke pipe")
             exit(0)
@@ -286,9 +373,9 @@ class Player:
             print(f"[{self.td}] broke pipe")
             exit(0)
 
-    def send(self, content: str = "", lines=0) -> None:
+    def send(self, content: str = "", lines=0,end="\n") -> None:
         try:
-            sending = ("\n"*lines)+content+"\n"
+            sending = ("\n"*lines)+content+end
             self.client.send(sending.encode())
         except BrokenPipeError:
             print(f"[{self.td}] broke pipe")

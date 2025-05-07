@@ -1,5 +1,3 @@
-from enum import Enum
-
 class CharLenError(Exception):
     def __init__(self,len):
         super().__init__(f"Char cant be longer than 1 is {len}.")
@@ -18,16 +16,16 @@ class Color:
         self.color_code = color_code
 
     def bg(self):
-        return f"\u001b[38;5;{self.color_code}m"
+        return f"\u001b[48;5;{self.color_code}m"
 
     def fg(self):
-        return f"\u001b[48;5;{self.color_code}m"
+        return f"\u001b[38;5;{self.color_code}m"
 
     def apply(self,text:str=" ",bg=False):
         if bg == True:
-            return self.bg() + text
+            return self.bg() + text + '\x1b[48;5;0m\x1b[38;5;15m'
         else:
-            return self.fg() + text
+            return self.fg() + text + '\x1b[48;5;0m\x1b[38;5;15m'
 
 class Char:
     def __init__(self,text:str = "", fg: Color=Color(232), bg: Color=Color(255)):
