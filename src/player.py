@@ -106,7 +106,39 @@ class Player:
                     )
                     character_class = classes[int(character_class)]
 
+
+                    races = {
+                        "Human": [],
+                        "Elf": ["Drow","High","Wood"],
+                        "Dwarf": ["Hill","Mountain"],
+                        "Dragonborn": [],
+                        "Gnome": ["Forest","Rock"],
+                        "Half-Elf": [],
+                        "Half-Orc": [],
+                        "Halfling": ["Lightfoot","Stout"],
+                        "Tiefling": [],
+                    }
+
+                    race: str = str(self.menu(
+                        list(races.keys()),
+                        "Race",
+                        string=True
+                    ))
+
+                    if len(races[race]) > 0:
+                        sub_race: str | None = str(self.menu(
+                            races[race],
+                            "Sub-Race",
+                            string=True
+                        ))
+                    else:
+                        sub_race: str | None = None
+
                     self.character["Class"] = character_class
+                    self.character["Sub-race"] = sub_race
+                    self.character["Race"] = race
+
+                    print(self.character)
 
                     break
                 case 1:
@@ -123,7 +155,7 @@ class Player:
                     else:
                         self.send("Not the name of a character or a command.")
 
-    def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False):
+    def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
         menu = " " + COLORS["YELLOW"].apply(COLORS["BLUE"].apply(f'{name}:\n',bg=True))
         for idx,i in enumerate(options):
             menu += f" {COLORS["BLUE"].apply(COLORS["YELLOW"].apply(str(idx)),bg=True)}) {COLORS["CYAN"].apply(i)}\n"
@@ -135,10 +167,16 @@ class Player:
             except:
                 pass
             if recv in options or (type(recv) == int and recv in range(len(options))):
-                if type(recv) == int:
-                    return recv
+                if string:
+                    if type(recv) == str:
+                        return recv
+                    else:
+                        return options[int(recv)]
                 else:
-                    return options.index(str(recv))
+                    if type(recv) == int:
+                        return recv
+                    else:
+                        return options.index(str(recv))
             elif other_options == True:
                 return recv
 
