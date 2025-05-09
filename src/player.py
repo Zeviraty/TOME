@@ -64,7 +64,7 @@ class Player:
         self.disconnected: bool = False
         self._disconnect_lock = threading.Lock()
         self.username: None | str = None
-        self.user: None | tuple = None
+        self.user: tuple = ()
         self.td: int | str = id
         self.privileges: list = []
         self.character: dict = {}
@@ -121,36 +121,89 @@ class Player:
 
                     race: str = str(self.menu(
                         list(races.keys()),
-                        "Race",
+                        "\nRace",
                         string=True
                     ))
 
                     if len(races[race]) > 0:
                         sub_race: str | None = str(self.menu(
                             races[race],
-                            "Sub-Race",
+                            "\nSub-Race",
                             string=True
                         ))
                     else:
                         sub_race: str | None = None
 
+                    names = conn.execute("SELECT name FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
+
+                    while True:
+                        name = self.input("Character name: ")
+                        if (name,) in names:
+                            self.send("One of your characters already has that name.")
+                        else:
+                            break
+
+                    gender = self.menu(
+                        [
+                            "Male",
+                            "Female",
+                        ],
+                        "\nGender"
+                    )
+
+                    al1 = self.menu(
+                        [
+                            "Lawful",
+                            "Neutral",
+                            "Chaotic"
+                        ],
+                        "\nFirst Alignment"
+                    )
+
+                    al2 = self.menu(
+                        [
+                            "Good",
+                            "Neutral",
+                            "Evil"
+                        ],
+                        "\nSecond Alignment"
+                    )
+
                     self.character["Class"] = character_class
                     self.character["Sub-race"] = sub_race
                     self.character["Race"] = race
+                    self.character["Name"] = name
+                    self.character["Gender"] = gender
+                    self.character["A1"] = al1
+                    self.character["A2"] = al2
 
-                    print(self.character)
+                    conn.execute("INSERT INTO characters (name, account_id) VALUES (?,?)",(name,self.user[0]))
 
-                    break
+                    self.character["ID"] = conn.execute("SELECT id FROM characters WHERE account_id = ? AND name = ?;",(self.user[0],name,)).fetchone()[0]
+
+
+                    for k,v in self.character.items():
+                        if k == "Name" or k == "ID":
+                            continue
+                        conn.execute("INSERT INTO character_attributes (attr_name, attr_value, character_id) VALUES (?,?,?)",(k,v,self.character["ID"]))
+
+                    conn.commit()
+                    conn.close()
+                    if self.yn("Play as "+name+"? "):
+                        self.send()
+                        break
                 case 1:
                     self.send("")
                     characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],))
+                    self.send(COLORS["YELLOW"].fg()+Color(17).apply("Characters:                 ",bg=True)+COLORS["BLUE"].bg())
                     for character in characters:
-                        self.send(character)
+                        self.send(f"{character[1]} {" "*(21-len(character[1]))}lvl: {character[3]}")
+                    self.send(COLORS["RESET"])
                 case 2:
                     self.disconnect("You chose to exit this realm.")
                     break
                 case _:
-                    if selected in conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],)):
+                    if selected in [item[0] for item in conn.execute("SELECT name FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()]:
                         break
                     else:
                         self.send("Not the name of a character or a command.")

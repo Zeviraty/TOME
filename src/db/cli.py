@@ -357,7 +357,7 @@ def apply_all():
 
     all_files.sort()  # Optional: ensure consistent order
 
-    for schema, path in all_files:
+    for schema, _ in all_files:
         if schema not in applied:
             #click.echo(f"Applying {schema}...")
             ctx = click.get_current_context()
@@ -389,6 +389,17 @@ def clear_errors():
     conn.commit()
     conn.close()
     click.echo("Cleared all migration errors.")
+
+@cli.command()
+@click.argument("table")
+def table(table):
+    conn = get()
+    data = conn.execute(f"PRAGMA table_info({table});").fetchall()
+
+    maxlen_id = max([len(str(item[0])) for item in data])
+    maxlen_name = max([len(str(item[1])) for item in data])
+    maxlen_type = max([len(str(item[1])) for item in data])
+    maxlen_nn = max([len(str(item[1])) for item in data])
 
 if __name__ == '__main__':
     cli()

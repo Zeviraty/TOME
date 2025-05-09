@@ -176,6 +176,7 @@ cython_debug/
 # db
 db/backups
 db/database.db
+db/database.db-journal
 
 # venv
 bin
