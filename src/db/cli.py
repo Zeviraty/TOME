@@ -399,7 +399,6 @@ def table(table):
         print("Table doesnt exist.")
         return
 
-
     maxlen_id = max([len(str(item[0])) for item in data])
     maxlen_name = max([len(str(item[1])) for item in data])
     maxlen_type = max([len(str(item[2])) for item in data])
