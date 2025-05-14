@@ -395,11 +395,19 @@ def clear_errors():
 def table(table):
     conn = get()
     data = conn.execute(f"PRAGMA table_info({table});").fetchall()
+    if len(data) == 0:
+        print("Table doesnt exist.")
+        return
 
     maxlen_id = max([len(str(item[0])) for item in data])
     maxlen_name = max([len(str(item[1])) for item in data])
-    maxlen_type = max([len(str(item[1])) for item in data])
-    maxlen_nn = max([len(str(item[1])) for item in data])
+    maxlen_type = max([len(str(item[2])) for item in data])
+    maxlen_nn = max([len(str(item[3])) for item in data])
+
+    print(f"id{" "*(maxlen_id-2)}|name{" "*(maxlen_name-4)}|type{" "*(maxlen_type-4)}|nn{" "*(maxlen_nn-2)}|")
+    print(f"--{"-"*(maxlen_id-2)}|----{"-"*(maxlen_name-4)}|----{"-"*(maxlen_type-4)}|--{"-"*(maxlen_nn-2)}|")
+    for item in data:
+        print(f"{item[0]}{" "*(maxlen_id+1-len(str(item[0])))}|{item[1]}{" "*(maxlen_name-len(str(item[1])))}|{item[2]}{" "*(maxlen_type-len(str(item[2])))}|{item[3]}{" "*(maxlen_nn+1-len(str(item[3])))}|")
 
 if __name__ == '__main__':
     cli()

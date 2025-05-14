@@ -4,6 +4,7 @@ import threading
 import db
 import hashlib
 from map import Color
+from map import map
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -197,14 +198,20 @@ class Player:
                     characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],))
                     self.send(COLORS["YELLOW"].fg()+Color(17).apply("Characters:                 ",bg=True)+COLORS["BLUE"].bg())
                     for character in characters:
-                        self.send(f"{character[1]} {" "*(21-len(character[1]))}lvl: {character[3]}")
+                        self.send(f"{character[1]} {" "*(22-len(character[1])-len(str(character[3])))}lvl: {character[3]}")
                     self.send(COLORS["RESET"])
                 case 2:
                     self.disconnect("You chose to exit this realm.")
                     break
                 case _:
-                    if selected in [item[0] for item in conn.execute("SELECT name FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()]:
-                        break
+                    characters = conn.execute("SELECT name, id FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
+                    if selected in [item[0] for item in characters]:
+                        id = [item[1] if item[0] == selected else False for item in characters]
+                        while False in id:
+                            id.remove(False)
+                        attributes = conn.execute("SELECT * FROM character_attributes WHERE character_id = ?;",(id[0],)).fetchall()
+                        for i in attributes:
+                            print(i)
                     else:
                         self.send("Not the name of a character or a command.")
 
