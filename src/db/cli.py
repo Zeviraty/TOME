@@ -34,9 +34,10 @@ def resolve_schema_path(schema_name, base_path="db/schemas", ext=".sql"):
 
 @cli.command()
 def full_init() -> None:
-    yn = input("This is destructive do you want to do this? (y/N): ")
-    if yn.lower() != "y":
-        return
+    if os.path.exists("db/database.db"):
+        yn = input("This is destructive do you want to do this? (y/N): ")
+        if yn.lower() != "y":
+            return
     click.echo("Creating directories...")
     backup_db()
     if os.path.exists("db/database.db"):

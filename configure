@@ -2,8 +2,11 @@
 
 echo "Configuring TOME..."
 
-# Check for python
-if ! command -v python >/dev/null 2>&1; then
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON=python3
+elif command -v python >/dev/null 2>&1; then
+    PYTHON=python
+else
     echo "Error: Python is not installed or not in your PATH."
     exit 1
 fi
@@ -25,18 +28,12 @@ if ! pip show pipreqs >/dev/null 2>&1; then
     echo "Make sure your ~/.local/bin is in your PATH if 'pipreqs' can't be found."
 fi
 
-# Check if make is installed
-if ! command -v make >/dev/null 2>&1; then
-    echo "Error: make is not installed or not in your PATH."
-    exit 1
-fi
-
 echo "All requirements for setup are present."
 
 echo ""
 echo "Now you can run:"
 echo "  make install    # to set up the environment"
-echo "  make run        # to run TOME"
+echo "  make run        # to start the MUD"
 echo "  make clean      # to clear logs and caches"
 echo "  make genreqs    # to regenerate requirements.txt"
 

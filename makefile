@@ -1,19 +1,30 @@
+PYTHON := $(shell (command -v python3 >/dev/null 2>&1 && echo python3) || \
+                 (command -v python >/dev/null 2>&1 && echo python) || \
+                 (echo ""))
+
+ifeq ($(PYTHON),)
+$(error No Python interpreter found (python3 or python))
+endif
+
 .PHONY: install run clean genreqs
 
 install:
 	mv .gitignore .gitignore.copy
-	python -m venv .
 	rm -rf .gitignore
 	mv .gitignore.copy .gitignore
-	pip install -r requirements.txt --break-system-packages
+	python3 -m pip install -r requirements.txt --break-system-packages
+	touch run
+	touch clean
+	touch dbcli
 	echo 'python src/db/cli.py $$@' > dbcli
-	echo make run > run
+	echo make run > run.sh
 	echo make clean > clean
-	chmod +x ./dbcli ./run ./clean
+	chmod +x ./dbcli ./run.sh ./clean
 	mkdir logs -p
+	python src/db/cli.py full-init
 
 run:
-	python src/main.py
+	$(PYTHON) src/main.py
 
 clean:
 	rm -rf logs/*.log __pycache__
