@@ -86,90 +86,140 @@ class Player:
             match selected:
                 case 0:
                     self.send("New character\n")
-                    classes = [
-                            "Paladin",
-                            "Fighter",
-                            "Rogue",
-                            "Mage",
-                            "Sorcerer",
-                            "Cleric",
-                            "Monk",
-                            "Warlock",
-                            "Barbarian",
-                            "Bard",
-                            "Druid",
-                            "Ranger",
-                        ]
-                    classes.sort()
-                    character_class = self.menu(
-                        classes,
-                        "Class",
-                    )
-                    character_class = classes[int(character_class)]
-
-
-                    races = {
-                        "Human": [],
-                        "Elf": ["Drow","High","Wood"],
-                        "Dwarf": ["Hill","Mountain"],
-                        "Dragonborn": [],
-                        "Gnome": ["Forest","Rock"],
-                        "Half-Elf": [],
-                        "Half-Orc": [],
-                        "Halfling": ["Lightfoot","Stout"],
-                        "Tiefling": [],
-                    }
-
-                    race: str = str(self.menu(
-                        list(races.keys()),
-                        "\nRace",
-                        string=True
-                    ))
-
-                    if len(races[race]) > 0:
-                        sub_race: str | None = str(self.menu(
-                            races[race],
-                            "\nSub-Race",
-                            string=True
-                        ))
-                    else:
-                        sub_race: str | None = None
-
-                    names = conn.execute("SELECT name FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
+                    menus = ["classes","races","name","gender","al1","al2","end"]
+                    current_menu = 0
 
                     while True:
-                        name = self.input("Character name: ")
-                        if (name,) in names:
-                            self.send("One of your characters already has that name.")
-                        else:
-                            break
+                        match menus[current_menu]:
+                            case "classes":
+                                classes = [
+                                        "Paladin",
+                                        "Fighter",
+                                        "Rogue",
+                                        "Mage",
+                                        "Sorcerer",
+                                        "Cleric",
+                                        "Monk",
+                                        "Warlock",
+                                        "Barbarian",
+                                        "Bard",
+                                        "Druid",
+                                        "Ranger",
+                                    ]
+                                classes.sort()
+                                character_class = self.menu(
+                                    classes,
+                                    "Class",
+                                )
+                                character_class = classes[int(character_class)]
+                                current_menu += 1
+                            case "races":
+                                races = {
+                                    "Human": [],
+                                    "Elf": ["Drow","High","Wood"],
+                                    "Dwarf": ["Hill","Mountain"],
+                                    "Dragonborn": [],
+                                    "Gnome": ["Forest","Rock"],
+                                    "Half-Elf": [],
+                                    "Half-Orc": [],
+                                    "Halfling": ["Lightfoot","Stout"],
+                                    "Tiefling": [],
+                                    "Back": [],
+                                }
 
-                    gender = self.menu(
-                        [
-                            "Male",
-                            "Female",
-                        ],
-                        "\nGender"
-                    )
+                                race: str = str(self.menu(
+                                    list(races.keys()),
+                                    "\nRace",
+                                    string=True
+                                ))
+                                if race == "Back":
+                                    current_menu -= 1
+                                else:
+                                    if len(races[race]) > 0:
+                                        sub_races = races[race]
+                                        sub_races.append("Back")
+                                        sub_race: str | None = str(self.menu(
+                                            sub_races,
+                                            "\nSub-Race",
+                                            string=True
+                                        ))
+                                        if sub_race == "Back":
+                                            del sub_race
+                                        else:
+                                            current_menu += 1
+                                    else:
+                                        sub_race: str | None = None
+                                        current_menu += 1
+                            case "name":
+                                names = conn.execute("SELECT name FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
 
-                    al1 = self.menu(
-                        [
-                            "Lawful",
-                            "Neutral",
-                            "Chaotic"
-                        ],
-                        "\nFirst Alignment"
-                    )
+                                while True:
+                                    name = self.input("Character name: ")
+                                    if (name,) in names:
+                                        self.send("One of your characters already has that name.")
+                                    else:
+                                        break
+                                current_menu += 1
 
-                    al2 = self.menu(
-                        [
-                            "Good",
-                            "Neutral",
-                            "Evil"
-                        ],
-                        "\nSecond Alignment"
-                    )
-
+                            case "gender":
+                                gender = self.menu(
+                                    [
+                                        "Male",
+                                        "Female",
+                                        "Non-Binary",
+                                        "Back"
+                                    ],
+                                    "\nGender",
+                                    string=True
+                                )
+                                if gender == "Back":
+                                    current_menu -=2
+                                    del gender
+                                else:
+                                    current_menu += 1
+                            case "al1":
+                                al1 = self.menu(
+                                    [
+                                        "Lawful",
+                                        "Neutral",
+                                        "Chaotic",
+                                        "Back"
+                                    ],
+                                    "\nFirst Alignment",
+                                    string = True
+                                )
+                                if al1 == "Back":
+                                    current_menu -= 1
+                                    del al1
+                                else:
+                                    current_menu += 1
+                            case "al2":
+                                al2 = self.menu(
+                                    [
+                                        "Good",
+                                        "Neutral",
+                                        "Evil",
+                                        "Back"
+                                    ],
+                                    "\nSecond Alignment",
+                                    string = True
+                                )
+                                if al2 == "Back":
+                                    current_menu -= 1
+                                    del al2
+                                else:
+                                    current_menu += 1
+                            case "end":
+                                self.send("Is this correct?:\n")
+                                self.send(f"Class    : {character_class}")
+                                self.send(f"Race     : {race}{'-'+sub_race if sub_race != None else ''}")
+                                self.send(f"Name     : {name}")
+                                self.send(f"Gender   : {character_class}")
+                                self.send(f"Alignment: {al1} {al2}")
+                                if self.yn(""):
+                                    break
+                                else:
+                                    current_menu -= 1
                     self.character["Class"] = character_class
                     self.character["Sub-race"] = sub_race
                     self.character["Race"] = race
@@ -179,7 +229,6 @@ class Player:
                     self.character["A2"] = al2
 
                     conn.execute("INSERT INTO characters (name, account_id) VALUES (?,?)",(name,self.user[0]))
-
                     self.character["ID"] = conn.execute("SELECT id FROM characters WHERE account_id = ? AND name = ?;",(self.user[0],name,)).fetchone()[0]
 
 
@@ -198,7 +247,7 @@ class Player:
                     characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],))
                     self.send(COLORS["YELLOW"].fg()+Color(17).apply("Characters:                 ",bg=True)+COLORS["BLUE"].bg())
                     for character in characters:
-                        self.send(f"{character[1]} {" "*(22-len(character[1])-len(str(character[3])))}lvl: {character[3]}")
+                        self.send(f"{character[1]} {' ' * (22 - len(character[1]) - len(str(character[3])))}lvl: {character[3]}")
                     self.send(COLORS["RESET"])
                 case 2:
                     self.disconnect("You chose to exit this realm.")
@@ -218,7 +267,7 @@ class Player:
     def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
         menu = " " + COLORS["YELLOW"].apply(COLORS["BLUE"].apply(f'{name}:\n',bg=True))
         for idx,i in enumerate(options):
-            menu += f" {COLORS["BLUE"].apply(COLORS["YELLOW"].apply(str(idx)),bg=True)}) {COLORS["CYAN"].apply(i)}\n"
+            menu += f" {COLORS['BLUE'].apply(COLORS['YELLOW'].apply(str(idx)), bg=True)}) {COLORS['CYAN'].apply(i)}\n"
         self.send(menu)
         while True:
             recv = self.input(input_string)
