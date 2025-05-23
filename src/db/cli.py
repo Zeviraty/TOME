@@ -74,8 +74,9 @@ CREATE TABLE IF NOT EXISTS migration_errors (
     click.echo("Fully initialized the database.")
 
 def backup_db():
-    dt_string = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-    shutil.copy("db/database.db", f"db/backups/{dt_string}.db")
+    if os.path.exists("db/database.db"):
+        dt_string = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+        shutil.copy("db/database.db", f"db/backups/{dt_string}.db")
 
 def get() -> sqlite3.Connection:
     return sqlite3.connect('db/database.db')
