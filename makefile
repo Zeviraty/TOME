@@ -35,7 +35,7 @@ genreqs:
 
 check:
 	@echo "Running checks..."
-	@python -m py_compile $$(find src -name '*.py') || { echo 'Syntax errors found.'; exit 1; }
+	@$(PYTHON) -m py_compile $$(find src -name '*.py') || { echo 'Syntax errors found.'; exit 1; }
 	@test -f requirements.txt || { echo 'Missing requirements.txt'; exit 1; }
 	@test -d src || { echo 'Missing src/ directory'; exit 1; }
 	@echo "All checks passed!"

@@ -43,13 +43,13 @@ TELNET_COMMANDS = {
 }
 
 INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
-"YELLOW" = Color(11),
-"CYAN" = Color(14),
-"BLUE" = Color(4),
-"WHITE" = Color(15),
-"BLACK" = Color(0),
-"RESET" = Color(15).fg() + Color(0).bg(),
-"DARK_YELLOW" = Color(3)
+YELLOW = Color(11)
+CYAN = Color(14)
+BLUE = Color(4)
+WHITE = Color(15)
+BLACK = Color(0)
+RESET = Color(15).fg() + Color(0).bg()
+DARK_YELLOW = Color(3)
 
 class Player:
     def __init__(self, client: socket.socket, addr: tuple, id: int) -> None:
@@ -243,10 +243,10 @@ class Player:
                 case 1:
                     self.send("")
                     characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],))
-                    self.send(COLORS["YELLOW"].fg()+Color(17).apply("Characters:                 ",bg=True)+COLORS["BLUE"].bg())
+                    self.send(YELLOW.fg()+Color(17).apply("Characters:                 ",bg=True)+BLUE.bg())
                     for character in characters:
                         self.send(f"{character[1]} {' ' * (22 - len(character[1]) - len(str(character[3])))}lvl: {character[3]}")
-                    self.send(COLORS["RESET"])
+                    self.send(RESET)
                 case 2:
                     self.disconnect("You chose to exit this realm.")
                     break
@@ -263,9 +263,9 @@ class Player:
                         self.send("Not the name of a character or a command.")
 
     def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
-        menu = " " + COLORS["YELLOW"].apply(COLORS["BLUE"].apply(f'{name}:\n',bg=True))
+        menu = " " + YELLOW.apply(BLUE.apply(f'{name}:\n',bg=True))
         for idx,i in enumerate(options):
-            menu += f" {COLORS['BLUE'].apply(COLORS['YELLOW'].apply(str(idx)), bg=True)}) {COLORS['CYAN'].apply(i)}\n"
+            menu += f" {BLUE.apply(YELLOW.apply(str(idx)), bg=True)}) {CYAN.apply(i)}\n"
         self.send(menu)
         while True:
             recv = self.input(input_string)
@@ -388,7 +388,7 @@ class Player:
             response = self.get().replace("\n","")
 
             if echo == True:
-                self.send(COLORS["DARK_YELLOW"].apply(response).strip())
+                self.send(DARK_YELLOW.apply(response).strip())
 
             self.gmcpsend("IAC WONT ECHO")
             self.getgmcp()

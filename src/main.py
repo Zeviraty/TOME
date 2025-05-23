@@ -1,7 +1,7 @@
 import socket
 import threading
 import banners
-from player import Player,COLORS
+from player import Player,RESET
 import db
 
 clients: list[Player] = []
@@ -13,8 +13,7 @@ DEBUG = True
 def handle_client(client_socket, addr, id):
     client = Player(client_socket, addr, id)
     clients.append(client)
-    client.send(COLORS["BLACK"].bg())
-    client.send(COLORS["WHITE"].fg())
+    client.send(RESET)
     client.send(banners.generate("TOME"))
     client.send("Welcome to TOME!\n")
     if not DEBUG:
