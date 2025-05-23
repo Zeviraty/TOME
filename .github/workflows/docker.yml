@@ -30,10 +30,10 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tags=zevvi/tome:$VERSION" >> "$GITHUB_OUTPUT"
         else
-          DATE=$(date +%Y%m%d)
+          DATE=$(date +%Ym%d)
           echo "tagged=false" >> "$GITHUB_OUTPUT"
           echo "version=nightly-$DATE" >> "$GITHUB_OUTPUT"
-          echo "tags=zevvi/tome:nightly" >> "$GITHUB_OUTPUT"
+          echo "tags=zevvi/tome:nightly,zevvi/tome:nightly-$DATE" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Build and push Docker image
