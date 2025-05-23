@@ -12,16 +12,16 @@ install:
 	mv .gitignore .gitignore.copy
 	rm -rf .gitignore
 	mv .gitignore.copy .gitignore
-	python3 -m pip install -r requirements.txt --break-system-packages
+	$(PYTHON) -m pip install -r requirements.txt --break-system-packages
 	touch run
 	touch clean
 	touch dbcli
-	echo 'python src/db/cli.py $$@' > dbcli
+	echo '$(PYTHON) src/db/cli.py $$@' > dbcli
 	echo make run > run.sh
 	echo make clean > clean
 	chmod +x ./dbcli ./run.sh ./clean
 	mkdir logs -p
-	python src/db/cli.py full-init
+	$(PYTHON) src/db/cli.py full-init
 
 run:
 	$(PYTHON) src/main.py
