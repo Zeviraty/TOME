@@ -43,15 +43,13 @@ TELNET_COMMANDS = {
 }
 
 INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
-COLORS = {
-    "YELLOW": Color(11),
-    "CYAN": Color(14),
-    "BLUE": Color(4),
-    "WHITE": Color(15),
-    "BLACK": Color(0),
-    "RESET": Color(15).fg() + Color(0).bg(),
-    "DARK_YELLOW": Color(3),
-}
+"YELLOW" = Color(11),
+"CYAN" = Color(14),
+"BLUE" = Color(4),
+"WHITE" = Color(15),
+"BLACK" = Color(0),
+"RESET" = Color(15).fg() + Color(0).bg(),
+"DARK_YELLOW" = Color(3)
 
 class Player:
     def __init__(self, client: socket.socket, addr: tuple, id: int) -> None:
@@ -128,7 +126,7 @@ class Player:
                                 }
 
                                 race: str = str(self.menu(
-                                    list(races.keys()),
+                                    list(raes.keys()),
                                     "\nRace",
                                     string=True
                                 ))
