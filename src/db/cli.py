@@ -40,7 +40,8 @@ def full_init(force) -> None:
         if yn.lower() != "y":
             return
     click.echo("Creating directories...")
-    backup_db()
+    if not force:
+        backup_db()
     if os.path.exists("db/database.db"):
         os.remove("db/database.db")
     for i in ["db","db/schemas","db/backups"]:
