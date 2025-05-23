@@ -13,8 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: configure
+    - name: configure chmod
       run: chmod +x ./configure
+
+    - name: configure
       run: ./configure
 
     - name: Install dependencies
