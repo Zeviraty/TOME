@@ -1,7 +1,8 @@
 import socket
 import threading
 import banners
-from player import Player,RESET
+from player import Player
+from utils.color import RESET
 import db
 
 clients: list[Player] = []
