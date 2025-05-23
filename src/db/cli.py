@@ -156,6 +156,8 @@ def init_db(dobackup=True, clickecho=False):
         files.sort()
 
         for schema in files:
+            if not schema.endswith(".sql"):
+                continue
             schema_name = schema.replace(".sql", "")
             schema_path = "db/schemas/"+dirname+"/"+schema_name+".sql"
             display_name = f"{dirname}.{schema_name}" if dirname != "schemas" else schema_name

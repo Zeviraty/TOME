@@ -49,15 +49,16 @@ dist:
 
 distcheck:
 	@echo "Creating source distribution package..."
-	make dist || { echo "Error: Failed to create the distribution package"; exit 1; }
+	@make dist || { echo "Error: Failed to create the distribution package"; exit 1; }
 
-	mkdir -p tmp-distcheck
-	tar -xzf TOME.tar.gz -C tmp-distcheck
+	@mkdir -p tmp-distcheck
+	@tar -xzf TOME.tar.gz -C tmp-distcheck
 
-	cd tmp-distcheck/ && ./configure && make
-	cd tmp-distcheck/ && make check
+	@cd tmp-distcheck/ && ./configure && make
+	@cd tmp-distcheck/ && make check
 
-	rm -rf tmp-distcheck
+	@rm -rf tmp-distcheck
 
 	@echo "distcheck completed successfully!"
+	@rm -rf TOME.tar.gz
 
