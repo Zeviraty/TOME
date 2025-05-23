@@ -21,7 +21,7 @@ install:
 	echo make clean > clean
 	chmod +x ./dbcli ./run.sh ./clean
 	mkdir logs -p
-	$(PYTHON) src/db/cli.py full-init
+	$(PYTHON) src/db/cli.py full-init --force
 
 run:
 	$(PYTHON) src/main.py

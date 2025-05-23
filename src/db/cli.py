@@ -33,8 +33,9 @@ def resolve_schema_path(schema_name, base_path="db/schemas", ext=".sql"):
     raise FileNotFoundError(f"No matching schema file found for '{schema_name}' in '{schema_dir}'")
 
 @cli.command()
-def full_init() -> None:
-    if os.path.exists("db/database.db"):
+@click.option("--force", is_flag=True, help="Force destructive action.")
+def full_init(force) -> None:
+    if os.path.exists("db/database.db") and not force:
         yn = input("This is destructive do you want to do this? (y/N): ")
         if yn.lower() != "y":
             return
