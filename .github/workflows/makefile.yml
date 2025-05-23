@@ -3,7 +3,6 @@ name: Makefile CI
 on:
   push:
     # Trigger workflow only on push to the main branch or on tags
-    branches: [ "main" ]
     tags: [ 'v*.*.*' ]  # Matches semantic version tags, e.g., v1.0.0, v1.1.0
 
 jobs:
