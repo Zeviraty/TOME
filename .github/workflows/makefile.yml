@@ -37,7 +37,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Create tarball
-    - run: make dist
+      run: make dist
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
