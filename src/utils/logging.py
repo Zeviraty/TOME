@@ -9,8 +9,3 @@ def info(text:str, name:str="+"):
 
 def disconnect(text:str, name:str="+"):
     print(f"\033[34m[DISCONNECT][{name}] {text}\033[0m")
-
-warn("WARNING!!!!")
-error("IT BROKE")
-info("some info")
-disconnect("disconnected")

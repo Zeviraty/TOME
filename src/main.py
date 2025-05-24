@@ -4,6 +4,7 @@ import banners
 from player import Player
 from utils.color import RESET
 import db
+import utils.logging as log
 
 clients: list[Player] = []
 global id
@@ -29,13 +30,13 @@ def main():
     global id
     while True:
         client, addr = server.accept()
-        print(f"[+] Accepted connection from: {addr[0]}:{addr[1]} id: {id + 1}")
+        log.info(f"Accepted connection from: {addr[0]}:{addr[1]} id: {id + 1}")
         id += 1
         client_handler = threading.Thread(target=handle_client, args=(client,addr,id))
         try:
             client_handler.start()
         except BrokenPipeError:
-            print(f"[+] {addr[0]}:{addr[1]} broke pipe" )
+            log.disconnect(f"{addr[0]}:{addr[1]} broke pipe" )
 
 if __name__ == "__main__":
     bind_ip = "0.0.0.0"
@@ -44,10 +45,10 @@ if __name__ == "__main__":
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((bind_ip, bind_port))
     server.listen(5)
-    print(f"[+] Listening on port {bind_ip} : {bind_port}")
+    log.info(f"Listening on port {bind_ip} : {bind_port}")
     try:
         main()
     except KeyboardInterrupt:
-        print("Closing server...")
+        log.info("Closing server...")
         for client in clients:
             client.disconnect("Server closed by admin.")

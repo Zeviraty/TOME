@@ -5,6 +5,7 @@ import db
 import hashlib
 from utils.color import *
 from utils.profanity import check_profanity
+import utils.logging as log
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -250,8 +251,6 @@ class Player:
                         while False in id:
                             id.remove(False)
                         attributes = conn.execute("SELECT * FROM character_attributes WHERE character_id = ?;",(id[0],)).fetchall()
-                        for i in attributes:
-                            print(i)
                     else:
                         self.send("Not the name of a character or a command.")
 
@@ -300,7 +299,7 @@ class Player:
                 self.send(f"Logged in as: {username}.\n")
                 self.username = username
                 self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-                print(f"[{self.td}] Logged in as: {self.username}")
+                log.info(f"Logged in as: {self.username}",self.td)
                 self.td = self.username
                 privileges = conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(self.user[0],)).fetchall()
                 for i in privileges:
@@ -368,7 +367,7 @@ class Player:
                 else:
                     return True
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.warn("broke pipe",self.td)
             exit(0)
 
     def input(self, message:str="", echo:bool=True) -> str:
@@ -382,7 +381,7 @@ class Player:
 
             if check_profanity(response):
                 self.disconnect(f"Used banned word in message: {response}.")
-                print(f"[{self.td}] broke pipe")
+                log.warn("broke pipe",self.td)
                 exit(0)
             else:
                 if echo == True:
@@ -392,7 +391,7 @@ class Player:
                 self.getgmcp()
                 return response
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def binput(self,message:str="") -> bytes:
@@ -400,7 +399,7 @@ class Player:
             self.send(message)
             return self.bget()
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def tinput(self, message: str = "", typed: type = str) -> str | bool:
@@ -500,7 +499,7 @@ class Player:
         try:
             self.client.send(content)
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def gmcpsend(self, content: str = "") -> None:
@@ -513,7 +512,7 @@ class Player:
         try:
             self.client.send(message)
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def send(self, content: str = "", lines=0,end="\n") -> None:
@@ -521,7 +520,7 @@ class Player:
             sending = ("\n"*lines)+content+end
             self.client.send(sending.encode())
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def disconnect(self, message: str = "Disconnected.") -> None:
@@ -541,4 +540,4 @@ class Player:
                 self.client.close()
             except:
                 pass
-            print(f"[{self.td}] Disconnected: {message}")
+            log.disconnect(message,self.td)
