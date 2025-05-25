@@ -14,6 +14,7 @@
 # About TOME
 
 TOME is a multi-user text engine designed to be used with traditional mud clients.
+This is the successor to my mud engine ARMUD
 
 # License
 This work is licensed under a
