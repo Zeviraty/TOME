@@ -120,7 +120,7 @@ class Player:
                                 }
 
                                 race: str = str(self.menu(
-                                    list(raes.keys()),
+                                    list(races.keys()),
                                     "\nRace",
                                     string=True
                                 ))
@@ -236,10 +236,13 @@ class Player:
                         break
                 case 1:
                     self.send("")
-                    characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],))
-                    self.send(YELLOW.fg()+Color(17).apply("Characters:                 ",bg=True)+DARK_BLUE.bg())
-                    for character in characters:
-                        self.send(f"{character[1]} {' ' * (22 - len(character[1]) - len(str(character[3])))}lvl: {character[3]}")
+                    characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
+                    if len(characters) != 0:
+                        self.send(YELLOW.fg()+Color(17).apply("Characters:                 ",bg=True)+DARK_BLUE.bg())
+                        for character in characters:
+                            self.send(f"{character[1]} {' ' * (22 - len(character[1]) - len(str(character[3])))}lvl: {character[3]}")
+                    else:
+                        self.send(YELLOW.fg()+"You have no characters yet, create one!")
                     self.send(RESET)
                 case 2:
                     self.disconnect("You chose to exit this realm.")
@@ -380,9 +383,7 @@ class Player:
             response = self.get().replace("\n","")
 
             if check_profanity(response):
-                self.disconnect(f"Used banned word in message: {response}.")
-                log.warn("broke pipe",self.td)
-                exit(0)
+                self.warn(f"Reason: Used banned word in message: {response}.")
             else:
                 if echo == True:
                     self.send(DARK_YELLOW.apply(response).strip())
@@ -523,6 +524,25 @@ class Player:
             log.disconnect("broke pipe",self.td)
             exit(0)
 
+    def sendtable(self, title: str, items: dict, compact: bool = False) -> None:
+        keys = list(items.keys())
+        num_rows = len(items[keys[0]]) if keys else 0
+
+        self.send(YELLOW.fg() + Color(17).apply(f"{title:<25}", bg=True) + DARK_BLUE.bg())
+
+        if compact:
+            for i in range(num_rows):
+                line = " ".join(f"{key}: {items[key][i]}" for key in keys)
+                self.send(line)
+            col_widths = {key: max(len(key), max(len(str(val)) for val in items[key])) for key in keys}
+            header = "  ".join(f"{key:<{col_widths[key]}}" for key in keys)
+            self.send(header)
+
+            for i in range(num_rows):
+                row = "  ".join(f"{str(items[key][i]):<{col_widths[key]}}" for key in keys)
+                self.send(row)
+
+
     def disconnect(self, message: str = "Disconnected.") -> None:
         with self._disconnect_lock:
             if self.disconnected:
@@ -541,3 +561,8 @@ class Player:
             except:
                 pass
             log.disconnect(message,self.td)
+
+    def warn(self,reason):
+        self.disconnect(f"Used banned word in message: {response}.")
+        log.warn("broke pipe",self.td)
+        exit(0)

@@ -22,8 +22,8 @@ def handle_client(client_socket, addr, id):
         client.login()
     else:
         conn = db.get()
-        client.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",("zeviraty",)).fetchone()
-        client.username = "Zeviraty"
+        client.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",("zevvi",)).fetchone()
+        client.username = "zevvi"
     client.mainmenu()
 
 def main():
