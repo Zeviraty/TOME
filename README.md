@@ -16,6 +16,13 @@
 TOME is a multi-user text engine designed to be used with traditional mud clients.
 This is the successor to my mud engine ARMUD
 
+# Installation
+1. Clone the repository `git clone git@github.com:zeviraty/TOME` or `git clone https://github.com/zeviraty/TOME`
+2. Run configure script: `./configure`
+3. Run install: `make install`
+4. Run code check: `make check`
+5. You are good to go!
+
 # License
 This work is licensed under a
 [Creative Commons Attribution-NonCommercial 4.0 International License][cc-by-nc].
