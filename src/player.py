@@ -299,6 +299,9 @@ class Player:
             password = self.input("Password: ",echo=False)
 
             if str(hashlib.sha256(password.encode()).digest()) == passwords[0]:
+                if conn.execute("SELECT banned FROM accounts WHERE name = ?;",(username,)).fetchone()[0] == 1:
+                    self.disconnect("You have been banned.")
+                    exit(0)
                 self.send(f"Logged in as: {username}.\n")
                 self.username = username
                 self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
@@ -383,7 +386,7 @@ class Player:
             response = self.get().replace("\n","")
 
             if check_profanity(response):
-                self.warn(f"Reason: Used banned word in message: {response}.")
+                self.warn(f"Used banned word in message: {response}.")
             else:
                 if echo == True:
                     self.send(DARK_YELLOW.apply(response).strip())
@@ -563,6 +566,16 @@ class Player:
             log.disconnect(message,self.td)
 
     def warn(self,reason):
-        self.disconnect(f"Used banned word in message: {response}.")
+        self.disconnect(reason)
         log.warn("broke pipe",self.td)
+        conn = db.get()
+        next_id = conn.execute('SELECT COALESCE(MAX(id), 0) + 1 FROM warnings WHERE account_id = ?', (self.user[0],)).fetchone()[0]
+
+        conn.execute('INSERT INTO warnings (id, account_id, reason) VALUES (?, ?, ?)', (next_id, self.user[0], reason))
+
+        if next_id >= 3:
+            conn.execute(f'UPDATE accounts SET banned = 1 WHERE id = {self.user[0]};')
+
+        conn.commit()
+        conn.close()
         exit(0)

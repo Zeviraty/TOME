@@ -81,7 +81,7 @@ def backup_db():
         shutil.copy("db/database.db", f"db/backups/{dt_string}.db")
 
 def get() -> sqlite3.Connection:
-    return sqlite3.connect('db/database.db')
+    return sqlite3.connect('db/database.db', timeout=100.0)
 
 def get_latest_backup():
     datetime_format = "%d-%m-%Y_%H-%M-%S"
