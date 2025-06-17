@@ -2,9 +2,8 @@ name: Makefile CI
 
 on:
   push:
-    # Trigger workflow only on push to the main branch or on tags
-    branches: [ "main" ]
-    tags: [ 'v*.*.*' ]  # Matches semantic version tags, e.g., v1.0.0, v1.1.0
+    branches: [ "*" ]
+    tags: [ 'v*.*.*' ]
 
 jobs:
   build:
@@ -31,18 +30,18 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')  # Only run on tags starting with v
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Create tarball
-    - run: make dist
+      run: make dist
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: ./TOME.tar.gz  # Path to your tarball or any release files
+        files: ./TOME.tar.gz
 
     - name: Upload Release Asset
       run: |

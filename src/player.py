@@ -5,6 +5,8 @@ import db
 import hashlib
 from utils.color import *
 from utils.profanity import check_profanity
+import utils.logging as log
+import utils.config
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -83,20 +85,7 @@ class Player:
                     while True:
                         match menus[current_menu]:
                             case "classes":
-                                classes = [
-                                        "Paladin",
-                                        "Fighter",
-                                        "Rogue",
-                                        "Mage",
-                                        "Sorcerer",
-                                        "Cleric",
-                                        "Monk",
-                                        "Warlock",
-                                        "Barbarian",
-                                        "Bard",
-                                        "Druid",
-                                        "Ranger",
-                                    ]
+                                classes = utils.config.get_dir("classes",key="name")
                                 classes.sort()
                                 character_class = self.menu(
                                     classes,
@@ -105,21 +94,11 @@ class Player:
                                 character_class = classes[int(character_class)]
                                 current_menu += 1
                             case "races":
-                                races = {
-                                    "Human": [],
-                                    "Elf": ["Drow","High","Wood"],
-                                    "Dwarf": ["Hill","Mountain"],
-                                    "Dragonborn": [],
-                                    "Gnome": ["Forest","Rock"],
-                                    "Half-Elf": [],
-                                    "Half-Orc": [],
-                                    "Halfling": ["Lightfoot","Stout"],
-                                    "Tiefling": [],
-                                    "Back": [],
-                                }
-
+                                races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races")}
+                                keys = list(races.keys())
+                                keys.append("Back")
                                 race: str = str(self.menu(
-                                    list(raes.keys()),
+                                    keys,
                                     "\nRace",
                                     string=True
                                 ))
@@ -235,10 +214,13 @@ class Player:
                         break
                 case 1:
                     self.send("")
-                    characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],))
-                    self.send(YELLOW.fg()+Color(17).apply("Characters:                 ",bg=True)+DARK_BLUE.bg())
-                    for character in characters:
-                        self.send(f"{character[1]} {' ' * (22 - len(character[1]) - len(str(character[3])))}lvl: {character[3]}")
+                    characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
+                    if len(characters) != 0:
+                        self.send(YELLOW.fg()+Color(17).apply("Characters:                 ",bg=True)+DARK_BLUE.bg())
+                        for character in characters:
+                            self.send(f"{character[1]} {' ' * (22 - len(character[1]) - len(str(character[3])))}lvl: {character[3]}")
+                    else:
+                        self.send(YELLOW.fg()+"You have no characters yet, create one!")
                     self.send(RESET)
                 case 2:
                     self.disconnect("You chose to exit this realm.")
@@ -250,8 +232,6 @@ class Player:
                         while False in id:
                             id.remove(False)
                         attributes = conn.execute("SELECT * FROM character_attributes WHERE character_id = ?;",(id[0],)).fetchall()
-                        for i in attributes:
-                            print(i)
                     else:
                         self.send("Not the name of a character or a command.")
 
@@ -297,10 +277,13 @@ class Player:
             password = self.input("Password: ",echo=False)
 
             if str(hashlib.sha256(password.encode()).digest()) == passwords[0]:
+                if conn.execute("SELECT banned FROM accounts WHERE name = ?;",(username,)).fetchone()[0] == 1:
+                    self.disconnect("You have been banned.")
+                    exit(0)
                 self.send(f"Logged in as: {username}.\n")
                 self.username = username
                 self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-                print(f"[{self.td}] Logged in as: {self.username}")
+                log.info(f"Logged in as: {self.username}",self.td)
                 self.td = self.username
                 privileges = conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(self.user[0],)).fetchall()
                 for i in privileges:
@@ -368,7 +351,7 @@ class Player:
                 else:
                     return True
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.warn("broke pipe",self.td)
             exit(0)
 
     def input(self, message:str="", echo:bool=True) -> str:
@@ -381,9 +364,7 @@ class Player:
             response = self.get().replace("\n","")
 
             if check_profanity(response):
-                self.disconnect(f"Used banned word in message: {response}.")
-                print(f"[{self.td}] broke pipe")
-                exit(0)
+                self.warn(f"Used banned word in message: {response}.")
             else:
                 if echo == True:
                     self.send(DARK_YELLOW.apply(response).strip())
@@ -392,7 +373,7 @@ class Player:
                 self.getgmcp()
                 return response
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def binput(self,message:str="") -> bytes:
@@ -400,7 +381,7 @@ class Player:
             self.send(message)
             return self.bget()
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def tinput(self, message: str = "", typed: type = str) -> str | bool:
@@ -500,7 +481,7 @@ class Player:
         try:
             self.client.send(content)
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def gmcpsend(self, content: str = "") -> None:
@@ -513,7 +494,7 @@ class Player:
         try:
             self.client.send(message)
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
 
     def send(self, content: str = "", lines=0,end="\n") -> None:
@@ -521,8 +502,27 @@ class Player:
             sending = ("\n"*lines)+content+end
             self.client.send(sending.encode())
         except BrokenPipeError:
-            print(f"[{self.td}] broke pipe")
+            log.disconnect("broke pipe",self.td)
             exit(0)
+
+    def sendtable(self, title: str, items: dict, compact: bool = False) -> None:
+        keys = list(items.keys())
+        num_rows = len(items[keys[0]]) if keys else 0
+
+        self.send(YELLOW.fg() + Color(17).apply(f"{title:<25}", bg=True) + DARK_BLUE.bg())
+
+        if compact:
+            for i in range(num_rows):
+                line = " ".join(f"{key}: {items[key][i]}" for key in keys)
+                self.send(line)
+            col_widths = {key: max(len(key), max(len(str(val)) for val in items[key])) for key in keys}
+            header = "  ".join(f"{key:<{col_widths[key]}}" for key in keys)
+            self.send(header)
+
+            for i in range(num_rows):
+                row = "  ".join(f"{str(items[key][i]):<{col_widths[key]}}" for key in keys)
+                self.send(row)
+
 
     def disconnect(self, message: str = "Disconnected.") -> None:
         with self._disconnect_lock:
@@ -541,4 +541,19 @@ class Player:
                 self.client.close()
             except:
                 pass
-            print(f"[{self.td}] Disconnected: {message}")
+            log.disconnect(message,self.td)
+
+    def warn(self,reason):
+        self.disconnect(reason)
+        log.warn("broke pipe",self.td)
+        conn = db.get()
+        next_id = conn.execute('SELECT COALESCE(MAX(id), 0) + 1 FROM warnings WHERE account_id = ?', (self.user[0],)).fetchone()[0]
+
+        conn.execute('INSERT INTO warnings (id, account_id, reason) VALUES (?, ?, ?)', (next_id, self.user[0], reason))
+
+        if next_id >= 3:
+            conn.execute(f'UPDATE accounts SET banned = 1 WHERE id = {self.user[0]};')
+
+        conn.commit()
+        conn.close()
+        exit(0)
