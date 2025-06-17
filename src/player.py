@@ -6,6 +6,7 @@ import hashlib
 from utils.color import *
 from utils.profanity import check_profanity
 import utils.logging as log
+import utils.config
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -84,20 +85,7 @@ class Player:
                     while True:
                         match menus[current_menu]:
                             case "classes":
-                                classes = [
-                                        "Paladin",
-                                        "Fighter",
-                                        "Rogue",
-                                        "Mage",
-                                        "Sorcerer",
-                                        "Cleric",
-                                        "Monk",
-                                        "Warlock",
-                                        "Barbarian",
-                                        "Bard",
-                                        "Druid",
-                                        "Ranger",
-                                    ]
+                                classes = utils.config.get_dir("classes",key="name")
                                 classes.sort()
                                 character_class = self.menu(
                                     classes,
@@ -106,21 +94,11 @@ class Player:
                                 character_class = classes[int(character_class)]
                                 current_menu += 1
                             case "races":
-                                races = {
-                                    "Human": [],
-                                    "Elf": ["Drow","High","Wood"],
-                                    "Dwarf": ["Hill","Mountain"],
-                                    "Dragonborn": [],
-                                    "Gnome": ["Forest","Rock"],
-                                    "Half-Elf": [],
-                                    "Half-Orc": [],
-                                    "Halfling": ["Lightfoot","Stout"],
-                                    "Tiefling": [],
-                                    "Back": [],
-                                }
-
+                                races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races")}
+                                keys = list(races.keys())
+                                keys.append("Back")
                                 race: str = str(self.menu(
-                                    list(races.keys()),
+                                    keys,
                                     "\nRace",
                                     string=True
                                 ))
