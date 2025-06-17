@@ -22,6 +22,9 @@ TOME is a multi-user text engine designed to be used with traditional mud client
 4. Run code check: `make check`
 5. You are good to go!
 
+# Modular
+Everything is in configuration files.
+
 # License
 This work is licensed under a
 [Creative Commons Attribution-NonCommercial 4.0 International License][cc-by-nc].
