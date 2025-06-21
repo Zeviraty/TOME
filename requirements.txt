@@ -1,5 +1,6 @@
 click==8.2.1
+psutil==7.0.0
 pyfiglet==1.0.2
-PyYAML==6.0.2
-textual==3.2.0
+textual==3.5.0
+toml==0.10.2
 trogon==0.6.0
