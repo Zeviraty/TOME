@@ -23,6 +23,7 @@ def handle_client(client_socket, addr, id):
     else:
         conn = db.get()
         client.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",("zevvi",)).fetchone()
+        client.mudclient = {'client': 'Mudlet', 'version': '4.19.1'}
         client.username = "zevvi"
     client.mainmenu()
 

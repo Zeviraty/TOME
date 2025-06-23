@@ -30,7 +30,9 @@ clean:
 	rm -rf logs/*.log __pycache__
 
 genreqs:
+	mv monitor ./src/monitor.py
 	pipreqs ./src --force
+	mv ./src/monitor.py monitor
 	mv ./src/requirements.txt ./requirements.txt
 
 check:

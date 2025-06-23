@@ -367,7 +367,11 @@ class Player:
                 self.warn(f"Used banned word in message: {response}.")
             else:
                 if echo == True:
-                    self.send(DARK_YELLOW.apply(response).strip())
+                    if "client" in self.mudclient.keys() and self.mudclient['client'] == "Mudlet":
+                        self.send("[Chat] hello!")
+                        self.send(message+" "+DARK_YELLOW.apply(response).strip())
+                    else:
+                        self.send(DARK_YELLOW.apply(response).strip())
 
                 self.gmcpsend("IAC WONT ECHO")
                 self.getgmcp()

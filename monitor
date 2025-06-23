@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+
+import os
+import psutil
+import time
+from datetime import datetime
+
+def get_cpu_usage():
+    return psutil.cpu_percent(interval=1)
+
+
+def get_memory_usage():
+    mem = psutil.virtual_memory()
+    return {
+        "total": mem.total,
+        "available": mem.available,
+        "used": mem.used,
+        "percent": mem.percent
+    }
+
+
+def log_system_usage():
+    cpu = get_cpu_usage()
+    memory = get_memory_usage()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    log_line = (
+        f"[{timestamp}] CPU: {cpu}% | "
+        f"Memory: {memory['percent']}% "
+        f"({memory['used'] / (1024**2):.2f}MB / {memory['total'] / (1024**2):.2f}MB)"
+    )
+    return log_line
+
+
+def log_to_file():
+    log_line = log_system_usage()
+    log_dir = f"logs/{datetime.now().strftime('%Y-%m-%d')}"
+    log_path = os.path.join(log_dir, "sysmon.log")
+    os.makedirs(log_dir, exist_ok=True)
+    with open(log_path, "a") as f:
+        f.write(log_line + "\n")
+
+
+def check_thresholds(cpu_threshold=90, mem_threshold=90):
+    cpu = get_cpu_usage()
+    mem = get_memory_usage()['percent']
+    if cpu > cpu_threshold or mem > mem_threshold:
+        print(f"\u26a0\ufe0f High usage detected! CPU: {cpu}%, Memory: {mem}%")
+
+
+def monitor_loop(interval=5, to_file=False, with_alerts=True):
+    try:
+        while True:
+            if to_file:
+                log_to_file()
+            else:
+                print(log_system_usage())
+
+            if with_alerts:
+                check_thresholds()
+
+            time.sleep(interval)
+    except KeyboardInterrupt:
+        print("Monitoring stopped.")
+
+
+if __name__ == "__main__":
+    monitor_loop()
