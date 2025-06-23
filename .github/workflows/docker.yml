@@ -2,10 +2,8 @@ name: Docker Image CI
 
 on:
   push:
-    branches:
-      - '**'  # Trigger on all branches
-    tags:
-      - 'v*.*.*'  # Also trigger on version tags
+    branches: ["*"]  # Run on all branches
+    tags: ['v*.*.*'] # Still run on version tags
 
 jobs:
   docker:
@@ -32,8 +30,9 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tags=zevvi/tome:$VERSION" >> "$GITHUB_OUTPUT"
         elif [[ "${GITHUB_REF}" == refs/heads/main ]]; then
-          # Do not build anything on non-tag main pushes
-          echo "skip=true" >> "$GITHUB_OUTPUT"
+          echo "tagged=false" >> "$GITHUB_OUTPUT"
+          echo "version=main" >> "$GITHUB_OUTPUT"
+          echo "tags=zevvi/tome:latest" >> "$GITHUB_OUTPUT"
         else
           DATE=$(date +%Y%m%d)
           echo "tagged=false" >> "$GITHUB_OUTPUT"
@@ -41,12 +40,7 @@ jobs:
           echo "tags=zevvi/tome:nightly,zevvi/tome:nightly-$DATE" >> "$GITHUB_OUTPUT"
         fi
 
-    - name: Exit if skipping
-      if: steps.meta.outputs.skip == 'true'
-      run: echo "Skipping build for non-tagged main push"
-
     - name: Build and push Docker image
-      if: steps.meta.outputs.skip != 'true'
       uses: docker/build-push-action@v5
       with:
         context: .
