@@ -63,6 +63,35 @@ class Player:
         self.privileges: list = []
         self.character: dict = {}
 
+    def racemenu(self):
+        races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races")}
+        keys = list(races.keys())
+        keys.append("Back")
+        race: str = str(self.menu(
+            keys,
+            "\nRace",
+            string=True
+        ))
+        if race == "Back":
+            return "Back"
+        else:
+            if len(races[race]) > 0:
+                sub_races = races[race]
+                sub_races.append("Back")
+                sub_race: str | None = str(self.menu(
+                    sub_races,
+                    "\nSub-Race",
+                    string=True
+                ))
+                if sub_race == "Back":
+                    return self.racemenu()
+                else:
+                    return {"sub_race": sub_race,"race":race}
+            else:
+                sub_race: str | None = None
+                return {"sub_race": sub_race, "race":race}
+
+
     def mainmenu(self):
         while True:
             selected = self.menu(
@@ -79,124 +108,24 @@ class Player:
             match selected:
                 case 0:
                     self.send("New character\n")
-                    menus = ["classes","races","name","gender","al1","al2","end"]
-                    current_menu = 0
+                    menus = [
+                        {"name":"Class","type":"options","options":utils.config.get_dir("classes",key="name")},
+                        {"name":"Race","type":"custom","function":self.racemenu},
+                        {"name":"Name","type":str},
+                        {"name":"Gender","type":"options","options":["Male","Female","Non-Binary"]},
+                        {"name":"Alignment 1","type":"options","options":["lawful","neutral","chaotic"]},
+                        {"name":"Alignment 2","type":"options","options":["good","neutral","evil"]},
+                    ]
 
-                    while True:
-                        match menus[current_menu]:
-                            case "classes":
-                                classes = utils.config.get_dir("classes",key="name")
-                                classes.sort()
-                                character_class = self.menu(
-                                    classes,
-                                    "Class",
-                                )
-                                character_class = classes[int(character_class)]
-                                current_menu += 1
-                            case "races":
-                                races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races")}
-                                keys = list(races.keys())
-                                keys.append("Back")
-                                race: str = str(self.menu(
-                                    keys,
-                                    "\nRace",
-                                    string=True
-                                ))
-                                if race == "Back":
-                                    current_menu -= 1
-                                else:
-                                    if len(races[race]) > 0:
-                                        sub_races = races[race]
-                                        sub_races.append("Back")
-                                        sub_race: str | None = str(self.menu(
-                                            sub_races,
-                                            "\nSub-Race",
-                                            string=True
-                                        ))
-                                        if sub_race == "Back":
-                                            del sub_race
-                                        else:
-                                            current_menu += 1
-                                    else:
-                                        sub_race: str | None = None
-                                        current_menu += 1
-                            case "name":
-                                names = conn.execute("SELECT name FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
+                    recv = self.pmenu(menus)
 
-                                while True:
-                                    name = self.input("Character name: ")
-                                    if (name,) in names:
-                                        self.send("One of your characters already has that name.")
-                                    else:
-                                        break
-                                current_menu += 1
-
-                            case "gender":
-                                gender = self.menu(
-                                    [
-                                        "Male",
-                                        "Female",
-                                        "Non-Binary",
-                                        "Back"
-                                    ],
-                                    "\nGender",
-                                    string=True
-                                )
-                                if gender == "Back":
-                                    current_menu -=2
-                                    del gender
-                                else:
-                                    current_menu += 1
-                            case "al1":
-                                al1 = self.menu(
-                                    [
-                                        "Lawful",
-                                        "Neutral",
-                                        "Chaotic",
-                                        "Back"
-                                    ],
-                                    "\nFirst Alignment",
-                                    string = True
-                                )
-                                if al1 == "Back":
-                                    current_menu -= 1
-                                    del al1
-                                else:
-                                    current_menu += 1
-                            case "al2":
-                                al2 = self.menu(
-                                    [
-                                        "Good",
-                                        "Neutral",
-                                        "Evil",
-                                        "Back"
-                                    ],
-                                    "\nSecond Alignment",
-                                    string = True
-                                )
-                                if al2 == "Back":
-                                    current_menu -= 1
-                                    del al2
-                                else:
-                                    current_menu += 1
-                            case "end":
-                                self.send("Is this correct?:\n")
-                                self.send(f"Class    : {character_class}")
-                                self.send(f"Race     : {race}{'-'+sub_race if sub_race != None else ''}")
-                                self.send(f"Name     : {name}")
-                                self.send(f"Gender   : {character_class}")
-                                self.send(f"Alignment: {al1} {al2}")
-                                if self.yn(""):
-                                    break
-                                else:
-                                    current_menu -= 1
-                    self.character["Class"] = character_class
-                    self.character["Sub-race"] = sub_race
-                    self.character["Race"] = race
-                    self.character["Name"] = name
-                    self.character["Gender"] = gender
-                    self.character["A1"] = al1
-                    self.character["A2"] = al2
+                    self.character["Class"] = recv["Class"]
+                    self.character["Sub-race"] = recv["sub_race"]
+                    self.character["Race"] = recv["race"]
+                    self.character["Name"] = recv["Name"]
+                    self.character["Gender"] = recv["Gender"]
+                    self.character["A1"] = recv["Alignment 1"]
+                    self.character["A2"] = recv["Alignment 2"]
 
                     conn.execute("INSERT INTO characters (name, account_id) VALUES (?,?)",(name,self.user[0]))
                     self.character["ID"] = conn.execute("SELECT id FROM characters WHERE account_id = ? AND name = ?;",(self.user[0],name,)).fetchone()[0]
@@ -259,6 +188,43 @@ class Player:
                         return options.index(str(recv))
             elif other_options == True:
                 return recv
+
+    def pmenu(self,pages:list[dict]):
+        current_menu = 0
+        chosen = {}
+        while current_menu < len(pages):
+            page = pages[current_menu]
+            if page["type"] == "options":
+                options = page["options"]
+                if current_menu != 0:
+                    options.append("Back")
+                recv = self.menu(
+                    page["options"],
+                    page["name"],
+                    string=True
+                )
+                if recv == "Back":
+                    current_menu -= 1
+                else:
+                    chosen[page["name"]] = recv
+                    current_menu += 1
+            elif page["type"] == "custom":
+                recv = page["function"]()
+                if recv == "Back":
+                    current_menu -= 1
+                else:
+                    chosen = {**recv,**chosen}
+                    current_menu += 1
+            elif page["type"] == str:
+                recv = self.input(f"Input: {page['name']}{' (or back)' if current_menu != 0 else ''}: ")
+                if recv.lower() == "back" and current_menu != 0:
+                    current_menu -= 1
+                else:
+                    chosen[page["name"]] = recv
+                    current_menu += 1
+            else:
+                pass
+        return chosen
 
     def login(self, gmcp:bool = True) -> None:
         if gmcp:
