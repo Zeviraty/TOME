@@ -226,7 +226,7 @@ class Player:
                 pass
         return chosen
 
-    def login(self, gmcp:bool = True) -> None:
+    def login(self, player:str|None=None,gmcp:bool = True) -> None:
         if gmcp:
             self.gmcpsend("IAC WILL GMCP")
             gmcp_response = self.getgmcp()
@@ -235,14 +235,37 @@ class Player:
             if "Core.Hello" in gmcp_response.keys():
                 self.mudclient = gmcp_response["Core.Hello"]
 
-        username = self.input("Username:").lower()
+        if player == None:
+            username = self.input("Username:").lower()
+        else:
+            username = player
         conn = db.get()
         passwords = conn.execute("SELECT password FROM accounts WHERE name = ?;",(username,)).fetchone()
+        conn.close()
+
+        if player != None:
+            if not passwords:
+                password = self.input(f"New password for {player}: ",echo=False)
+                conn.execute("INSERT INTO accounts (name, password) VALUES (?, ?)", (player,str(hashlib.sha256(password.encode()).digest())))
+                conn.commit()
+                conn.close()
+            self.username = username
+            conn = db.get()
+            self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
+            log.info(f"Logged in as: {self.username}",self.td)
+            self.td = self.username
+            privileges = conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(self.user[0],)).fetchall()
+            for i in privileges:
+                self.privileges.append(i[0])
+            return
+
 
         if passwords:
             password = self.input("Password: ",echo=False)
 
             if str(hashlib.sha256(password.encode()).digest()) == passwords[0]:
+                conn.close()
+                conn = db.get()
                 if conn.execute("SELECT banned FROM accounts WHERE name = ?;",(username,)).fetchone()[0] == 1:
                     self.disconnect("You have been banned.")
                     exit(0)
@@ -278,7 +301,7 @@ class Player:
                 conn.commit()
                 conn.close()
 
-            self.login(False)
+            self.login(gmcp=False)
 
     def get(self) -> str:
         if self.disconnected:
