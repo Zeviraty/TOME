@@ -1,5 +1,5 @@
-FROM ubuntu:latest
-RUN apt-get update && apt-get install -y python3 make python3-pip
+FROM python:3
+RUN apt-get update && apt-get install -y make
 COPY src/ src/
 COPY db/schemas db/schemas
 COPY .gitignore .gitignore
@@ -8,6 +8,7 @@ COPY configure configure
 COPY makefile makefile
 COPY README.md README.md
 COPY requirements.txt requirements.txt
+COPY config/ config/
 RUN chmod +x configure
 RUN ./configure
 RUN make install && make clean
