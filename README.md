@@ -25,8 +25,13 @@ This is the successor to my mud engine ARMUD
 5. You are good to go!
 
 ## Docker
+### From docker hub
 1. Pull the docker image `docker pull zevvi/tome:latest` or `docker pull zevvi/tome:nightly` for nightly
 2. Run the docker image `docker run zevvi/tome:latest` or `docker run zevvi/tome:nightly`
+### From source
+1. Clone the repository `git clone git@github.com:zeviraty/TOME` or `git clone https://github.com/zeviraty/TOME`
+2. Build the docker image `docker build . -t tome:nightly`
+3. Run the docker image `docker run tome:nightly`
 
 # Modular
 Everything is in configuration files under the config/ directory:
