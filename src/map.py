@@ -24,7 +24,9 @@ class Object:
         pass
 
 class Player(Object):
-    def __init__(self,metadata:dict={}):
+    def __init__(self,metadata=None):
+        if metadata == None:
+            metadata = {}
         self.char = Char("@")
         self.metadata = metadata
 
