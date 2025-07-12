@@ -13,7 +13,9 @@ class Char:
         return self.bg.apply(self.fg.apply(self.text,True)) + "\033[0m"
 
 class Object:
-    def __init__(self, char:Char,metadata:dict={}):
+    def __init__(self, char:Char,metadata:dict=None):
+        if metadata == None:
+            metadata = {}
         self.char = char
         self.metadata = metadata
 
@@ -24,7 +26,7 @@ class Object:
         pass
 
 class Player(Object):
-    def __init__(self,metadata=None):
+    def __init__(self,metadata:dict=None):
         if metadata == None:
             metadata = {}
         self.char = Char("@")
