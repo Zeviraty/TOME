@@ -9,8 +9,6 @@ import click
 import os
 
 clients: list[Player] = []
-global id
-id = 0
 
 def handle_client(client_socket, addr, id,debug):
     client = Player(client_socket, addr, id)
@@ -22,14 +20,12 @@ def handle_client(client_socket, addr, id,debug):
         client.login()
     else:
         conn = db.get()
-        debug_player = os.getenv("TOME_DEBUG_USER")
-        if debug_player == None:
-            debug_player = "admin"
+        debug_player = os.getenv("TOME_DEBUG_USER", "admin")
         client.login(debug_player)
     client.mainmenu()
 
 def main(server,debug):
-    global id
+    id = 0
     while True:
         client, addr = server.accept()
         log.info(f"Accepted connection from: {addr[0]}:{addr[1]} id: {id + 1}")
