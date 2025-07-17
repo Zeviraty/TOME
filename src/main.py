@@ -7,6 +7,7 @@ import db
 import utils.logging as log
 import click
 import os
+from website import start
 
 clients: list[Player] = []
 
@@ -45,7 +46,9 @@ def cmd(bind = "0.0.0.0", port = 2323, debug=False):
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((bind, port))
     server.listen(5)
-    log.info(f"Listening on port {bind} : {port}")
+    log.info(f"Started server  on {bind} : {port}")
+    log.info(f"Started website on {bind} : 8000")
+    threading.Thread(target=start, args=(8000,)).start()
     try:
         main(server,debug)
     except KeyboardInterrupt:
