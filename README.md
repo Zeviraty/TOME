@@ -39,12 +39,8 @@ Everything is in configuration files under the config/ directory:
  - Races
  - Profanity
 
-# License
-This work is licensed under a
-[Creative Commons Attribution-NonCommercial 4.0 International License][cc-by-nc].
+## License
 
-[![CC BY-NC 4.0][cc-by-nc-image]][cc-by-nc]
-
-[cc-by-nc]: https://creativecommons.org/licenses/by-nc/4.0/
-[cc-by-nc-image]: https://licensebuttons.net/l/by-nc/4.0/88x31.png
-[cc-by-nc-shield]: https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.  
+You may remix, adapt, and share with credit, but not use commercially.  
+Full license: [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
