@@ -3,7 +3,7 @@ import threading
 import banners
 from player import Player
 from utils.color import RESET
-import db
+import db.utils as db
 import utils.logging as log
 import click
 import os
