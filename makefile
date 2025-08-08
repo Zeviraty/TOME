@@ -10,14 +10,12 @@ endif
 
 install:
 	@$(PYTHON) -m pip install -r requirements.txt --break-system-packages
-	@touch run
 	@touch clean
 	@touch dbcli
 	@echo '$(PYTHON) src/db/cli.py $$@' > dbcli
 	@echo make run > run.sh
-	@echo make run > run
 	@echo make clean > clean
-	@chmod +x ./dbcli ./run.sh ./clean ./run
+	@chmod +x ./dbcli ./run.sh ./clean
 	@mkdir logs -p
 	@$(PYTHON) src/db/cli.py full-init --force
 	@mkdir -p ~/bin && echo "$(PYTHON) $(CURDIR)/src/main.py" > ~/bin/tome && chmod +x ~/bin/tome
