@@ -1,4 +1,8 @@
 from datetime import datetime
+import os
+
+if not os.path.exists("logs"):
+    os.mkdir("logs")
 
 def warn(text:str, name:str="+"):
     text = f"[{datetime.today().strftime('%H:%M:%S')}] \033[33m[WARN] [{name}] {text}"
