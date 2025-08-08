@@ -1,28 +1,30 @@
 import socket
 import threading
 import banners
-from player import Player
 from utils.color import RESET
 import db.utils as db
 import utils.logging as log
 import click
 import os
+from client.client import Client
+import client.mainmenu as mm
 
-clients: list[Player] = []
+clients: list[Client] = []
 
 def handle_client(client_socket, addr, id,debug):
-    client = Player(client_socket, addr, id)
+    client = Client(client_socket, addr, id)
     clients.append(client)
     client.send(RESET)
     client.send(banners.generate("TOME"))
     client.send("Welcome to TOME!\n")
     if not debug:
-        client.login()
+        mm.login(client)
     else:
         conn = db.get()
         debug_player = os.getenv("TOME_DEBUG_USER", "admin")
-        client.login(debug_player)
-    client.mainmenu()
+
+        mm.login(client,debug_player)
+    mm.mainmenu(client)
 
 def main(server,debug):
     id = 0

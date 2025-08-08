@@ -1,12 +1,13 @@
 import socket
 import json
 import threading
-import db
 import hashlib
 from utils.color import *
+import db.utils as db
 from utils.profanity import check_profanity
 import utils.logging as log
 import utils.config
+import client.mainmenu as mm
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -46,7 +47,7 @@ TELNET_COMMANDS = {
 
 INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
 
-class Player:
+class Client:
     def __init__(self, client: socket.socket, addr: tuple, id: int) -> None:
         self.client: socket.socket = client
         self.addr: tuple = addr
@@ -62,108 +63,9 @@ class Player:
         self.td: int | str = id
         self.privileges: list = []
         self.character: dict = {}
+        self.conn = db.get()
 
-    def racemenu(self):
-        races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races")}
-        keys = list(races.keys())
-        keys.append("Back")
-        race: str = str(self.menu(
-            keys,
-            "\nRace",
-            string=True
-        ))
-        if race == "Back":
-            return "Back"
-        else:
-            if len(races[race]) > 0:
-                sub_races = races[race]
-                sub_races.append("Back")
-                sub_race: str | None = str(self.menu(
-                    sub_races,
-                    "\nSub-Race",
-                    string=True
-                ))
-                if sub_race == "Back":
-                    return self.racemenu()
-                else:
-                    return {"sub_race": sub_race,"race":race}
-            else:
-                sub_race: str | None = None
-                return {"sub_race": sub_race, "race":race}
-
-
-    def mainmenu(self):
-        while True:
-            selected = self.menu(
-                [
-                    "New character",
-                    "List characters",
-                    "Exit",
-                ],
-                "Main Menu",
-                "Command or Name of character: ",
-                True,
-            )
-            conn = db.get()
-            match selected:
-                case 0:
-                    self.send("New character\n")
-                    menus = [
-                        {"name":"Class","type":"options","options":utils.config.get_dir("classes",key="name")},
-                        {"name":"Race","type":"custom","function":self.racemenu},
-                        {"name":"Name","type":str},
-                        {"name":"Gender","type":"options","options":["Male","Female","Non-Binary"]},
-                        {"name":"Alignment 1","type":"options","options":["lawful","neutral","chaotic"]},
-                        {"name":"Alignment 2","type":"options","options":["good","neutral","evil"]},
-                    ]
-
-                    recv = self.pmenu(menus)
-
-                    self.character["Class"] = recv["Class"]
-                    self.character["Sub-race"] = recv["sub_race"]
-                    self.character["Race"] = recv["race"]
-                    self.character["Name"] = recv["Name"]
-                    self.character["Gender"] = recv["Gender"]
-                    self.character["A1"] = recv["Alignment 1"]
-                    self.character["A2"] = recv["Alignment 2"]
-
-                    conn.execute("INSERT INTO characters (name, account_id) VALUES (?,?)",(name,self.user[0]))
-                    self.character["ID"] = conn.execute("SELECT id FROM characters WHERE account_id = ? AND name = ?;",(self.user[0],name,)).fetchone()[0]
-
-
-                    for k,v in self.character.items():
-                        if k == "Name" or k == "ID":
-                            continue
-                        conn.execute("INSERT INTO character_attributes (attr_name, attr_value, character_id) VALUES (?,?,?)",(k,v,self.character["ID"]))
-
-                    conn.commit()
-                    conn.close()
-                    if self.yn("Play as "+name+"? "):
-                        self.send()
-                        break
-                case 1:
-                    self.send("")
-                    characters = conn.execute("SELECT * FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
-                    if len(characters) != 0:
-                        self.send(YELLOW.fg()+Color(17).apply("Characters:                 ",bg=True)+DARK_BLUE.bg())
-                        for character in characters:
-                            self.send(f"{character[1]} {' ' * (22 - len(character[1]) - len(str(character[3])))}lvl: {character[3]}")
-                    else:
-                        self.send(YELLOW.fg()+"You have no characters yet, create one!")
-                    self.send(RESET)
-                case 2:
-                    self.disconnect("You chose to exit this realm.")
-                    break
-                case _:
-                    characters = conn.execute("SELECT name, id FROM characters WHERE account_id = ?;",(self.user[0],)).fetchall()
-                    if selected in [item[0] for item in characters]:
-                        id = [item[1] if item[0] == selected else False for item in characters]
-                        while False in id:
-                            id.remove(False)
-                        attributes = conn.execute("SELECT * FROM character_attributes WHERE character_id = ?;",(id[0],)).fetchall()
-                    else:
-                        self.send("Not the name of a character or a command.")
-
+    
     def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
         menu = " " + YELLOW.apply(DARK_BLUE.apply(f'{name}:\n',bg=True))
         for idx,i in enumerate(options):
@@ -209,7 +111,7 @@ class Player:
                     chosen[page["name"]] = recv
                     current_menu += 1
             elif page["type"] == "custom":
-                recv = page["function"]()
+                recv = page["function"](self)
                 if recv == "Back":
                     current_menu -= 1
                 else:
@@ -226,82 +128,6 @@ class Player:
                 pass
         return chosen
 
-    def login(self, player:str|None=None,gmcp:bool = True) -> None:
-        if gmcp:
-            self.gmcpsend("IAC WILL GMCP")
-            gmcp_response = self.getgmcp()
-            if "gmcp" in gmcp_response.keys():
-                self.gmcp = gmcp_response["gmcp"]
-            if "Core.Hello" in gmcp_response.keys():
-                self.mudclient = gmcp_response["Core.Hello"]
-
-        if player == None:
-            username = self.input("Username:").lower()
-        else:
-            username = player
-        conn = db.get()
-        passwords = conn.execute("SELECT password FROM accounts WHERE name = ?;",(username,)).fetchone()
-        conn.close()
-
-        if player != None:
-            if not passwords:
-                password = self.input(f"New password for {player}: ",echo=False)
-                conn.execute("INSERT INTO accounts (name, password) VALUES (?, ?)", (player,str(hashlib.sha256(password.encode()).digest())))
-                conn.commit()
-                conn.close()
-            self.username = username
-            conn = db.get()
-            self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-            log.info(f"Logged in as: {self.username}",self.td)
-            self.td = self.username
-            privileges = conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(self.user[0],)).fetchall()
-            for i in privileges:
-                self.privileges.append(i[0])
-            return
-
-
-        if passwords:
-            password = self.input("Password: ",echo=False)
-
-            if str(hashlib.sha256(password.encode()).digest()) == passwords[0]:
-                conn.close()
-                conn = db.get()
-                if conn.execute("SELECT banned FROM accounts WHERE name = ?;",(username,)).fetchone()[0] == 1:
-                    self.disconnect("You have been banned.")
-                    exit(0)
-                self.send(f"Logged in as: {username}.\n")
-                self.username = username
-                self.user = conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-                log.info(f"Logged in as: {self.username}",self.td)
-                self.td = self.username
-                privileges = conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(self.user[0],)).fetchall()
-                for i in privileges:
-                    self.privileges.append(i[0])
-            else:
-                self.send("Wrong password.")
-                self.login(False)
-
-        else:
-            create = self.yn("Account does not exist, do you want to create it? ",preferred_option="n")
-            if create:
-                while True:
-                    password = self.input("Password: ",echo=False)
-                    if password == self.input("Confirm password: ",echo=False):
-                        break
-                    else:
-                        self.send("Passwords do not match.")
-
-                conn.execute("INSERT INTO accounts (name, password) VALUES (?, ?)",
-                    (
-                        username,
-                        str(hashlib.sha256(password.encode()).digest())
-                    )
-                )
-
-                conn.commit()
-                conn.close()
-
-            self.login(gmcp=False)
 
     def get(self) -> str:
         if self.disconnected:
@@ -341,6 +167,7 @@ class Player:
                     return True
         except BrokenPipeError:
             log.warn("broke pipe",self.td)
+            self.conn.close()
             exit(0)
 
     def input(self, message:str="", echo:bool=True) -> str:
@@ -357,7 +184,6 @@ class Player:
             else:
                 if echo == True:
                     if "client" in self.mudclient.keys() and self.mudclient['client'] == "Mudlet":
-                        self.send("[Chat] hello!")
                         self.send(message+" "+DARK_YELLOW.apply(response).strip())
                     else:
                         self.send(DARK_YELLOW.apply(response).strip())
@@ -367,6 +193,7 @@ class Player:
                 return response
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
+            self.conn.close()
             exit(0)
 
     def binput(self,message:str="") -> bytes:
@@ -375,6 +202,7 @@ class Player:
             return self.bget()
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
+            self.conn.close()
             exit(0)
 
     def tinput(self, message: str = "", typed: type = str) -> str | bool:
@@ -475,6 +303,7 @@ class Player:
             self.client.send(content)
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
+            self.conn.close()
             exit(0)
 
     def gmcpsend(self, content: str = "") -> None:
@@ -488,6 +317,7 @@ class Player:
             self.client.send(message)
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
+            self.conn.close()
             exit(0)
 
     def send(self, content: str = "", lines=0,end="\n") -> None:
@@ -496,6 +326,7 @@ class Player:
             self.client.send(sending.encode())
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
+            self.conn.close()
             exit(0)
 
     def sendtable(self, title: str, items: dict, compact: bool = False) -> None:
@@ -539,7 +370,6 @@ class Player:
     def warn(self,reason):
         self.disconnect(reason)
         log.warn("broke pipe",self.td)
-        conn = db.get()
         next_id = conn.execute('SELECT COALESCE(MAX(id), 0) + 1 FROM warnings WHERE account_id = ?', (self.user[0],)).fetchone()[0]
 
         conn.execute('INSERT INTO warnings (id, account_id, reason) VALUES (?, ?, ?)', (next_id, self.user[0], reason))
@@ -547,6 +377,6 @@ class Player:
         if next_id >= 3:
             conn.execute(f'UPDATE accounts SET banned = 1 WHERE id = {self.user[0]};')
 
-        conn.commit()
-        conn.close()
+        self.conn.commit()
+        self.conn.close()
         exit(0)
