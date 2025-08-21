@@ -2,6 +2,8 @@ PYTHON := $(shell (command -v python3 >/dev/null 2>&1 && echo python3) || \
                  (command -v python >/dev/null 2>&1 && echo python) || \
                  (echo ""))
 
+NAME := tome
+
 ifeq ($(PYTHON),)
 $(error No Python interpreter found (python3 or python))
 endif
@@ -18,7 +20,7 @@ install:
 	@chmod +x ./dbcli ./run.sh ./clean
 	@mkdir logs -p
 	@$(PYTHON) src/db/cli.py full-init --force
-	@mkdir -p ~/bin && echo "$(PYTHON) $(CURDIR)/src/main.py" > ~/bin/tome && chmod +x ~/bin/tome
+	@mkdir -p ~/bin && echo "$(PYTHON) $(CURDIR)/src/main.py" > ~/bin/$(NAME) && chmod +x ~/bin/$(NAME)
 	@echo "Make sure that ~/bin is in your path"
 
 run:
