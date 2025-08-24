@@ -39,9 +39,9 @@ def main(server,debug):
             log.disconnect(f"{addr[0]}:{addr[1]} broke pipe" )
 
 @click.command()
-@click.option('--bind', default="0.0.0.0", help="IP to bind to")
-@click.option('--port', default=2323, help="Port for tome")
-@click.option('--debug', help="Enable debug mode", is_flag=True)
+@click.option('-b','--bind', default="0.0.0.0", help="IP to bind to")
+@click.option('-p','--port', default=2323, help="Port for tome")
+@click.option('-d','--debug', help="Enable debug mode", is_flag=True)
 def cmd(bind = "0.0.0.0", port = 2323, debug=False):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
