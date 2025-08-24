@@ -168,6 +168,10 @@ class Client:
         except BrokenPipeError:
             log.warn("broke pipe",self.td)
             self.conn.close()
+            self.disconnected = True
+            exit(0)
+        except OSError:
+            self.disconnected = True
             exit(0)
 
     def input(self, message:str="", echo:bool=True) -> str:
@@ -195,6 +199,9 @@ class Client:
             log.disconnect("broke pipe",self.td)
             self.conn.close()
             exit(0)
+        except OSError:
+            self.disconnected = True
+            exit(0)
 
     def binput(self,message:str="") -> bytes:
         try:
@@ -203,6 +210,9 @@ class Client:
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
             self.conn.close()
+            exit(0)
+        except OSError:
+            self.disconnected = True
             exit(0)
 
     def tinput(self, message: str = "", typed: type = str) -> str | bool:
@@ -305,6 +315,9 @@ class Client:
             log.disconnect("broke pipe",self.td)
             self.conn.close()
             exit(0)
+        except OSError:
+            self.disconnected = True
+            exit(0)
 
     def gmcpsend(self, content: str = "") -> None:
         message: bytes = b""
@@ -319,6 +332,9 @@ class Client:
             log.disconnect("broke pipe",self.td)
             self.conn.close()
             exit(0)
+        except OSError:
+            self.disconnected = True
+            exit(0)
 
     def send(self, content: str = "", lines=0,end="\n") -> None:
         try:
@@ -327,6 +343,9 @@ class Client:
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
             self.conn.close()
+            exit(0)
+        except OSError:
+            self.disconnected = True
             exit(0)
 
     def sendtable(self, title: str, items: dict, compact: bool = False) -> None:
