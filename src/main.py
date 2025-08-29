@@ -43,6 +43,7 @@ def main(server,debug):
 @click.option('-p','--port', default=2323, help="Port for tome")
 @click.option('-d','--debug', help="Enable debug mode", is_flag=True)
 def cmd(bind = "0.0.0.0", port = 2323, debug=False):
+    log.start()
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((bind, port))
