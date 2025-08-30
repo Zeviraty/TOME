@@ -33,9 +33,9 @@ class Player(Object):
         self.metadata = metadata
 
 class TileOptions:
-    def __init__(self,**kwargs):
-        for k,v in kwargs:
-            self.__setattr__(k,v)
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 class Tile:
     def __init__(self, char:Char,tileopts:TileOptions|None=None):
@@ -61,8 +61,8 @@ class Room:
         self.objects[y][x] = z
 
     def set_tile(self,x:int,y:int,z:Tile):
-        if x > self.x or y > self.y:
-            raise OutsideOfMapBoundsException(x,y)
+        if x >= self.x or y >= self.y:
+            raise OutsideOfMapBoundsException(x, y)
 
         self.tiles[y][x] = z
 
@@ -85,7 +85,7 @@ class Room:
         tmp = ""
         for y,yt in enumerate(self.tiles):
             for x,tile in enumerate(yt):
-                if type(self.objects[y][x]) != NoneType:
+                if self.objects[y][x] is not None:
                     tmp += str(self.objects[y][x])
                 else:
                     tmp += str(tile)
