@@ -1,5 +1,6 @@
 from types import NoneType
 from utils.color import Color
+from exceptions import CharLenError, OutsideOfMapBoundsException
 
 class Char:
     def __init__(self,text:str = "", fg: Color=Color(232), bg: Color=Color(-1)):
