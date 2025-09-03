@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+from pprint import pp
 
 current_log = ""
 
@@ -35,3 +36,23 @@ def disconnect(text:str, name:str="+"):
     text = f"[{datetime.today().strftime('%H:%M:%S')}] \033[34m[DISCONNECT] [{name}] {text}"
     open('logs/'+current_log,'a').write(text.replace("\033[34m",'')+"\n")
     print(text+"\033[0m")
+
+
+
+def pwarn(text:str, name:str="+"):
+    prefix = f"[{datetime.today().strftime('%H:%M:%S')}] \033[33m[WARN] [{name}]"
+    open('logs/'+current_log,'a').write(text.replace("\033[33m",'')+"\n")
+    print(prefix,end="")
+    pp(text,"\033[0m")
+
+def perror(text:str, name:str="+"):
+    prefix = f"[{datetime.today().strftime('%H:%M:%S')}] \033[31m[ERROR] [{name}]"
+    open('logs/'+current_log,'a').write(text.replace("\033[31m",'')+"\n")
+    print(prefix,end="")
+    pp(text,"\033[0m")
+
+def pinfo(text:str, name:str="+"):
+    prefix = f"[{datetime.today().strftime('%H:%M:%S')}] [INFO] [{name}]"
+    open('logs/'+current_log,'a').write(text+"\n")
+    print(prefix,end="")
+    pp(text,"\033[0m")
