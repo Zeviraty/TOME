@@ -8,12 +8,17 @@ def start():
     if not os.path.exists("logs"):
         os.mkdir("logs")
 
+
+
+
     global current_log
     current_log = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
     
-    while not os.path.exists('logs/'+current_log):
+    while os.path.exists('logs/'+current_log):
         if current_log[-1].isnumeric():
-            current_log[-1] = str(int(current_log[-1]) + 1)
+            edited = list(current_log)
+            edited[-1] = str(int(current_log[-1]) + 1)
+            current_log = str(edited)
         else:
             current_log += "1"
 
