@@ -10,7 +10,7 @@ import utils.config
 import client.mainmenu as mm
 
 def racemenu(client):
-    races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races")}
+    races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races",ls=True)}
     keys = list(races.keys())
     keys.append("Back")
     race: str = str(client.menu(
