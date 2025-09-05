@@ -137,6 +137,8 @@ class Client:
         except (BrokenPipeError, OSError):
             self.disconnected = True
             return ""
+        except UnicodeDecodeError:
+            return ""
 
     def bget(self) -> bytes:
         if self.disconnected:
@@ -145,6 +147,8 @@ class Client:
             return self.client.recv(2048)
         except (BrokenPipeError, OSError):
             self.disconnected = True
+            return b""
+        except UnicodeDecodeError:
             return b""
 
     def yn(self,question:str,preferred_option="y") -> bool:
