@@ -177,8 +177,9 @@ class Client:
     def input(self, message:str="", echo:bool=True) -> str:
         try:
             message = message.strip().replace("\n","")
-            self.gmcpsend("IAC WILL ECHO")
-            self.getgmcp()
+            if self.mudclient["client"] != "UNKNOWN":
+                self.gmcpsend("IAC WILL ECHO")
+                self.getgmcp()
 
             self.send(message,end="")
             response = self.get().replace("\n","")
@@ -186,14 +187,16 @@ class Client:
             if check_profanity(response):
                 self.warn(f"Used banned word in message: {response}.")
             else:
-                if echo == True:
+                if echo == True and self.mudclient["client"] != "UNKNOWN":
                     if "client" in self.mudclient.keys() and self.mudclient['client'] == "Mudlet":
                         self.send(message+" "+DARK_YELLOW.apply(response).strip())
                     else:
                         self.send(DARK_YELLOW.apply(response).strip())
 
-                self.gmcpsend("IAC WONT ECHO")
-                self.getgmcp()
+                
+                if self.mudclient["client"] != "UNKNOWN":
+                    self.gmcpsend("IAC WONT ECHO")
+                    self.getgmcp()
                 return response
         except BrokenPipeError:
             log.disconnect("broke pipe",self.td)
