@@ -8,9 +8,6 @@ def start():
     if not os.path.exists("logs"):
         os.mkdir("logs")
 
-
-
-
     global current_log
     current_log = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
     
@@ -47,17 +44,20 @@ def disconnect(data, name:str="+"):
 def pwarn(data, name:str="+"):
     prefix = f"[{datetime.today().strftime('%H:%M:%S')}] \033[33m[WARN] [{name}]"
     open('logs/'+current_log,'a').write(data.replace("\033[33m",'')+"\n")
-    print(prefix,end="")
-    pp(data,"\033[0m")
+    print(prefix,end=" ")
+    pp(data)
+    print("\033[0m",end=" ")
 
 def perror(data, name:str="+"):
     prefix = f"[{datetime.today().strftime('%H:%M:%S')}] \033[31m[ERROR] [{name}]"
     open('logs/'+current_log,'a').write(data.replace("\033[31m",'')+"\n")
-    print(prefix,end="")
-    pp(data,"\033[0m")
+    print(prefix,end=" ")
+    pp(data)
+    print("\033[0m",end=" ")
 
 def pinfo(data, name:str="+"):
     prefix = f"[{datetime.today().strftime('%H:%M:%S')}] [INFO] [{name}]"
     open('logs/'+current_log,'a').write(str(data)+"\n")
-    print(prefix,end="")
-    pp(data,"\033[0m")
+    print(prefix,end=" ")
+    pp(data)
+    print("\033[0m",end=" ")
