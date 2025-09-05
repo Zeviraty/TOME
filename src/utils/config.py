@@ -15,11 +15,14 @@ def get(path:str, key:str="all") -> dict:
         except KeyError:
             return {}
 
-def get_dir(path:str, key:str="all") -> list:
+def get_dir(path:str, key:str="all", ls=False) -> list:
     tmp = []
     for i in os.listdir(os.path.join("config/",path)):
-        if os.path.isdir(os.path.join("config/",path,i)):
-            tmp.append({path+"/"+i: get_dir(os.path.join(path,i),key)})
+        if ls == False:
+            if os.path.isdir(os.path.join("config/",path,i)):
+                tmp.append({path+"/"+i: get_dir(os.path.join(path,i),key)})
+            else:
+                tmp.append({path+"/"+i: get(os.path.join(path,i),key)})
         else:
-            tmp.append({path+"/"+i: get(os.path.join(path,i),key)})
+            tmp.append(get(os.path.join(path,i),key))
     return tmp

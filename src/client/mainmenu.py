@@ -54,7 +54,7 @@ def mainmenu(client):
             case 0:
                 client.send("New character\n")
                 menus = [
-                    {"name":"Class","type":"options","options":utils.config.get_dir("classes",key="name")},
+                    {"name":"Class","type":"options","options":utils.config.get_dir("classes",key="name",ls=True)},
                     {"name":"Race","type":"custom","function":racemenu},
                     {"name":"Name","type":str},
                     {"name":"Gender","type":"options","options":["Male","Female","Non-Binary"]},
