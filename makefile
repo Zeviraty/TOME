@@ -27,7 +27,7 @@ run:
 	$(PYTHON) src/main.py
 
 clean:
-	rm -rf logs/*.log __pycache__
+	rm -rf logs/*.log
 
 genreqs:
 	mv monitor ./src/monitor.py
