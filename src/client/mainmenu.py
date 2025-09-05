@@ -110,8 +110,10 @@ def login(client, player:str|None=None,gmcp:bool = True) -> None:
     if gmcp:
         client.gmcpsend("IAC WILL GMCP")
         gmcp_response = client.getgmcp()
+        log.pinfo(gmcp_response,client.td)
         if "gmcp" in gmcp_response.keys():
             client.gmcp = gmcp_response["gmcp"]
+            client.mudclient = {"client": "UNKNOWN"} 
         if "Core.Hello" in gmcp_response.keys():
             client.mudclient = gmcp_response["Core.Hello"]
 
