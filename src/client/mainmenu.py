@@ -40,6 +40,9 @@ def racemenu(client):
 
 def mainmenu(client):
     while True:
+        if len(client.user) == 0:
+            client.disconnect()
+            return
         selected = client.menu(
             [
                 "New character",
@@ -106,11 +109,13 @@ def mainmenu(client):
                 else:
                     client.send("Not the name of a character or a command.")
 
-def login(client, player:str|None=None,gmcp:bool = True) -> None:
+def login(client, player:str|None=None,gmcp:bool = True, amount=0) -> None:
+    if amount > 5:
+        client.disconnect()
+        return
     if gmcp:
         client.gmcpsend("IAC WILL GMCP")
         gmcp_response = client.getgmcp()
-        log.pinfo(gmcp_response,client.td)
         if "gmcp" in gmcp_response.keys():
             client.gmcp = gmcp_response["gmcp"]
             client.mudclient = {"client": "UNKNOWN"} 
@@ -155,7 +160,7 @@ def login(client, player:str|None=None,gmcp:bool = True) -> None:
                 client.privileges.append(i[0])
         else:
             client.send("Wrong password.")
-            login(client,False)
+            login(client,False, amount= amount + 1)
 
     else:
         create = client.yn("Account does not exist, do you want to create it? ",preferred_option="n")
@@ -176,5 +181,5 @@ def login(client, player:str|None=None,gmcp:bool = True) -> None:
 
             client.conn.commit()
 
-        login(client,gmcp=False)
+        login(client,gmcp=False, amount = amount + 1)
 

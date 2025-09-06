@@ -10,9 +10,17 @@ from client.client import Client
 import client.mainmenu as mm
 
 clients: list[Client] = []
+id = 0
 
-def handle_client(client_socket, addr, id,debug):
-    client = Client(client_socket, addr, id)
+def remove_client(client):
+    if client in clients:
+        global id
+        id -= 1
+        clients.remove(client)
+
+def handle_client(client_socket, addr,debug):
+    global id
+    client = Client(client_socket, addr, id, remove_client)
     clients.append(client)
     client.send(RESET)
     client.send(banners.generate("TOME"))
@@ -25,14 +33,15 @@ def handle_client(client_socket, addr, id,debug):
 
         mm.login(client,debug_player)
     mm.mainmenu(client)
+    remove_client(client)
 
 def main(server,debug):
-    id = 0
+    global id
     while True:
         client, addr = server.accept()
         log.info(f"Accepted connection from: {addr[0]}:{addr[1]} id: {id + 1}")
         id += 1
-        client_handler = threading.Thread(target=handle_client, args=(client,addr,id,debug))
+        client_handler = threading.Thread(target=handle_client, args=(client,addr,debug))
         try:
             client_handler.start()
         except BrokenPipeError:

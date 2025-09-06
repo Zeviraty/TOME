@@ -48,7 +48,7 @@ TELNET_COMMANDS = {
 INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
 
 class Client:
-    def __init__(self, client: socket.socket, addr: tuple, id: int) -> None:
+    def __init__(self, client: socket.socket, addr: tuple, id: int, remove_callback) -> None:
         self.client: socket.socket = client
         self.addr: tuple = addr
         self.x: int = 0
@@ -57,13 +57,13 @@ class Client:
         self.mudclient: None | list = None
         self.id: int = id
         self.disconnected: bool = False
-        self._disconnect_lock = threading.Lock()
         self.username: None | str = None
         self.user: tuple = ()
         self.td: int | str = id
         self.privileges: list = []
         self.character: dict = {}
         self.conn = db.get()
+        self.remove_callback = remove_callback
 
     
     def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
@@ -135,7 +135,7 @@ class Client:
         try:
             return self.client.recv(2048).decode().strip()
         except (BrokenPipeError, OSError):
-            self.disconnected = True
+            self.disconnect()
             return ""
         except UnicodeDecodeError:
             return ""
@@ -146,7 +146,7 @@ class Client:
         try:
             return self.client.recv(2048)
         except (BrokenPipeError, OSError):
-            self.disconnected = True
+            self.disconnect()
             return b""
         except UnicodeDecodeError:
             return b""
@@ -172,10 +172,10 @@ class Client:
         except BrokenPipeError:
             log.warn("broke pipe",self.td)
             self.conn.close()
-            self.disconnected = True
+            self.disconnect()
             exit(0)
         except OSError:
-            self.disconnected = True
+            self.disconnect()
             exit(0)
 
     def input(self, message:str="", echo:bool=True) -> str:
@@ -202,25 +202,15 @@ class Client:
                     self.gmcpsend("IAC WONT ECHO")
                     self.getgmcp()
                 return response
-        except BrokenPipeError:
-            log.disconnect("broke pipe",self.td)
-            self.conn.close()
-            exit(0)
-        except OSError:
-            self.disconnected = True
-            exit(0)
+        except (BrokenPipeError, OSError):
+            self.disconnect()
 
     def binput(self,message:str="") -> bytes:
         try:
             self.send(message)
             return self.bget()
-        except BrokenPipeError:
-            log.disconnect("broke pipe",self.td)
-            self.conn.close()
-            exit(0)
-        except OSError:
-            self.disconnected = True
-            exit(0)
+        except (BrokenPipeError, OSError):
+            self.disconnect()
 
     def tinput(self, message: str = "", typed: type = str) -> str | bool:
         if self.disconnected:
@@ -318,13 +308,8 @@ class Client:
     def bsend(self, content: bytes) -> None:
         try:
             self.client.send(content)
-        except BrokenPipeError:
-            log.disconnect("broke pipe",self.td)
-            self.conn.close()
-            exit(0)
-        except OSError:
-            self.disconnected = True
-            exit(0)
+        except (BrokenPipeError, OSError):
+            self.disconnect()
 
     def gmcpsend(self, content: str = "") -> None:
         message: bytes = b""
@@ -335,25 +320,15 @@ class Client:
                 message += i.encode()
         try:
             self.client.send(message)
-        except BrokenPipeError:
-            log.disconnect("broke pipe",self.td)
-            self.conn.close()
-            exit(0)
-        except OSError:
-            self.disconnected = True
-            exit(0)
+        except (BrokenPipeError, OSError):
+            self.disconnect()
 
     def send(self, content: str = "", lines=0,end="\n") -> None:
         try:
             sending = ("\n"*lines)+content+end
             self.client.send(sending.encode())
-        except BrokenPipeError:
-            log.disconnect("broke pipe",self.td)
-            self.conn.close()
-            exit(0)
-        except OSError:
-            self.disconnected = True
-            exit(0)
+        except (BrokenPipeError, OSError):
+            self.disconnect()
 
     def sendtable(self, title: str, items: dict, compact: bool = False) -> None:
         keys = list(items.keys())
@@ -375,23 +350,23 @@ class Client:
 
 
     def disconnect(self, message: str = "Disconnected.") -> None:
-        with self._disconnect_lock:
-            if self.disconnected:
-                return
-            self.disconnected = True
-            try:
-                self.send(f"Disconnected: {message}")
-            except:
-                pass
-            try:
-                self.client.shutdown(socket.SHUT_RDWR)
-            except:
-                pass
-            try:
-                self.client.close()
-            except:
-                pass
-            log.disconnect(message,self.td)
+        if self.disconnected:
+            return
+        self.disconnected = True
+        try:
+            self.send(f"Disconnected: {message}")
+        except:
+            pass
+        try:
+            self.client.shutdown(socket.SHUT_RDWR)
+        except:
+            pass
+        try:
+            self.client.close()
+        except:
+            pass
+        log.disconnect(message,self.td)
+        self.remove_callback(self)
 
     def warn(self,reason):
         self.disconnect(reason)
