@@ -371,12 +371,12 @@ class Client:
     def warn(self,reason):
         self.disconnect(reason)
         log.warn("broke pipe",self.td)
-        next_id = conn.execute('SELECT COALESCE(MAX(id), 0) + 1 FROM warnings WHERE account_id = ?', (self.user[0],)).fetchone()[0]
+        next_id = self.conn.execute('SELECT COALESCE(MAX(id), 0) + 1 FROM warnings WHERE account_id = ?', (self.user[0],)).fetchone()[0]
 
-        conn.execute('INSERT INTO warnings (id, account_id, reason) VALUES (?, ?, ?)', (next_id, self.user[0], reason))
+        self.conn.execute('INSERT INTO warnings (id, account_id, reason) VALUES (?, ?, ?)', (next_id, self.user[0], reason))
 
         if next_id >= 3:
-            conn.execute(f'UPDATE accounts SET banned = 1 WHERE id = {self.user[0]};')
+            self.conn.execute(f'UPDATE accounts SET banned = 1 WHERE id = {self.user[0]};')
 
         self.conn.commit()
         self.conn.close()
