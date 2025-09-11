@@ -192,3 +192,4 @@ logs/
 TOME.tar.gz
 gcp
 lines
+tools/map-editor/zte.py
