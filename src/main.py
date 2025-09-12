@@ -8,6 +8,8 @@ import click
 import os
 from client.client import Client
 import client.mainmenu as mm
+import sending
+from world.worldThread import worldThread
 
 clients: list[Client] = []
 id = 0
@@ -37,6 +39,7 @@ def handle_client(client_socket, addr,debug):
 
 def main(server,debug):
     global id
+    threading.Thread(target=worldThread).start()
     while True:
         client, addr = server.accept()
         log.info(f"Accepted connection from: {addr[0]}:{addr[1]} id: {id + 1}")
@@ -53,6 +56,7 @@ def main(server,debug):
 @click.option('-d','--debug', help="Enable debug mode", is_flag=True)
 def cmd(bind = "0.0.0.0", port = 2323, debug=False):
     log.start()
+    sending.init_sender()
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((bind, port))

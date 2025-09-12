@@ -8,6 +8,7 @@ from utils.profanity import check_profanity
 import utils.logging as log
 import utils.config
 import client.mainmenu as mm
+import sending
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -187,6 +188,8 @@ class Client:
 
             self.send(message,end="")
             response = self.get().replace("\n","")
+            if response == "map":
+                sending.send(sending.Message("World",self.td,{}))
 
             if check_profanity(response):
                 self.warn(f"Used banned word in message: {response}.")
