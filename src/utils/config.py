@@ -1,6 +1,5 @@
 import toml
 import os
-from pprint import pp
 
 def get(path:str, key:str="all") -> dict:
     if not path.endswith(".toml"):
