@@ -2,13 +2,13 @@ import socket
 import json
 import threading
 import hashlib
-from src.utils.color import *
-import src.db.utils as db
-from src.utils.profanity import check_profanity
-import src.utils.logging as log
-import src.utils.config
-import src.client.mainmenu as mm
-import src.sending
+from utils.color import *
+import db.utils as db
+from utils.profanity import check_profanity
+import utils.logging as log
+import utils.config
+import client.mainmenu as mm
+import sending
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -65,7 +65,6 @@ class Client:
         self.character: dict = {}
         self.conn = db.get()
         self.remove_callback = remove_callback
-
     
     def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
         menu = " " + YELLOW.apply(DARK_BLUE.apply(f'{name}:\n',bg=True))

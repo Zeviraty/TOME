@@ -1,13 +1,13 @@
 import socket
 import json
 import threading
-import src.db.utils as db
+import db.utils as db
 import hashlib
-from src.utils.color import *
-from src.utils.profanity import check_profanity
-import src.utils.logging as log
-import src.utils.config
-import src.client.mainmenu as mm
+from utils.color import *
+from utils.profanity import check_profanity
+import utils.logging as log
+import utils.config
+import client.mainmenu as mm
 
 def racemenu(client):
     races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races",ls=True)}

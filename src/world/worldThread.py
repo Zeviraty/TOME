@@ -1,6 +1,6 @@
-import src.world.map as m
+import world.map as m
 import sending
-import src.utils.logging as log
+import utils.logging as log
 
 global world_map
 world_map = m.Map
