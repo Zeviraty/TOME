@@ -14,9 +14,9 @@ endif
 install:
 	@# Install libraries
 	@$(PYTHON) -m pip install -r requirements.txt --break-system-packages
-	ifeq ($(DOCKER),0)
-		curl -s https://raw.githubusercontent.com/zeviraty/zte/main/main.py -o tools/map-editor/zte.py
-	endif
+ifeq ($(DOCKER),0)
+	curl -s https://raw.githubusercontent.com/zeviraty/zte/main/main.py -o tools/map-editor/zte.py
+endif
 	@touch clean
 	@touch dbcli
 	@echo '$(PYTHON) src/db/cli.py $$@' > dbcli
