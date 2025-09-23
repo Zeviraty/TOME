@@ -3,6 +3,7 @@ PYTHON := $(shell (command -v python3 >/dev/null 2>&1 && echo python3) || \
                  (echo ""))
 
 NAME := tome
+DOCKER ?= 0
 
 ifeq ($(PYTHON),)
 $(error No Python interpreter found (python3 or python))
@@ -13,7 +14,9 @@ endif
 install:
 	@# Install libraries
 	@$(PYTHON) -m pip install -r requirements.txt --break-system-packages
-	curl -s https://raw.githubusercontent.com/zeviraty/zte/main/main.py -o tools/map-editor/zte.py
+	ifeq ($(DOCKER),0)
+		curl -s https://raw.githubusercontent.com/zeviraty/zte/main/main.py -o tools/map-editor/zte.py
+	endif
 	@touch clean
 	@touch dbcli
 	@echo '$(PYTHON) src/db/cli.py $$@' > dbcli

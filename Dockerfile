@@ -11,6 +11,6 @@ COPY requirements.txt requirements.txt
 COPY config/ config/
 RUN chmod +x configure
 RUN ./configure
-RUN make install && make clean
+RUN make install DOCKER=1 && make clean
 EXPOSE 2323
 CMD ["make","run"]
