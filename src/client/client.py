@@ -2,13 +2,13 @@ import socket
 import json
 import threading
 import hashlib
-from utils.color import *
-import db.utils as db
-from utils.profanity import check_profanity
-import utils.logging as log
-import utils.config
-import client.mainmenu as mm
-import sending
+from src.utils.color import *
+import src.db.utils as db
+from src.utils.profanity import check_profanity
+import src.utils.logging as log
+import src.utils.config
+import src.client.mainmenu as mm
+import src.sending
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)

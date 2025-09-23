@@ -1,15 +1,15 @@
 import socket
 import threading
 import banners
-from utils.color import RESET
-import db.utils as db
-import utils.logging as log
+from src.utils.color import RESET
+import src.db.utils as db
+import src.utils.logging as log
 import click
 import os
-from client.client import Client
-import client.mainmenu as mm
-import sending
-from world.worldThread import worldThread
+from src.client.client import Client
+import src.client.mainmenu as mm
+import src.sending
+from src.world.worldThread import worldThread
 
 clients: list[Client] = []
 id = 0
