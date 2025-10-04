@@ -8,6 +8,7 @@ from utils.profanity import check_profanity
 import utils.logging as log
 import utils.config
 import client.mainmenu as mm
+import client.telnet as telnet
 
 def racemenu(client):
     races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races",ls=True)}
@@ -114,8 +115,8 @@ def login(client, player:str|None=None,gmcp:bool = True, amount=0) -> None:
         client.disconnect()
         return
     if gmcp:
-        client.gmcpsend("IAC WILL GMCP")
-        gmcp_response = client.getgmcp()
+        telnet.send(client,"IAC WILL GMCP")
+        gmcp_response = telnet.get(client)
         if "gmcp" in gmcp_response.keys():
             client.gmcp = gmcp_response["gmcp"]
             client.mudclient = {"client": "UNKNOWN"} 
