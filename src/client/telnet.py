@@ -35,8 +35,12 @@ TELNET_COMMANDS = {
     # Common MUD extensions
     "GMCP":  bytes([201]),  # Generic Mud Communication Protocol
     "ATCP":  bytes([200]),  # Achaea Telnet Client Protocol (Inferior to GMCP)
-    "MSDP":  bytes([69]),   # MUD Server Data Protocol
+    "MSDP":  bytes([69]),   # MUD Server Data Protocol (Implemented in GMCP)
     "MSSP":  bytes([70]),   # MUD Server Status Protocol
+
+    # MSSP
+    "MSSP_VAR": bytes([1]), # MSSP variable
+    "MSSP_VAL": bytes([2]), # MSSP value
 
 }
 
@@ -44,7 +48,7 @@ INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
 
 def send(client, content: str = "") -> None:
     message: bytes = b""
-    for i in content.split(" "):
+    for i in content.replace("\\","").split(" "):
         if i in TELNET_COMMANDS.keys():
             message += TELNET_COMMANDS[i]
         else:
