@@ -41,6 +41,8 @@ def racemenu(client):
 
 def mainmenu(client):
     while True:
+        if client.disconnected:
+            return
         if len(client.user) == 0:
             client.disconnect()
             return
@@ -111,6 +113,8 @@ def mainmenu(client):
                     client.send("Not the name of a character or a command.")
 
 def login(client, player:str|None=None,gmcp:bool = True, amount=0) -> None:
+    if client.disconnected:
+        return
     if amount > 5:
         client.disconnect()
         return
