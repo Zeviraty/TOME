@@ -1,5 +1,6 @@
 import os
 import re
+import utils.logging as log
 
 class ProfanityChecker:
     def __init__(self, profanity_dir="config/profanity") -> None:
@@ -20,7 +21,10 @@ class ProfanityChecker:
         words = re.findall(r"\b\w+\b", text.lower())
         return any(word in self.profanity_set for word in words)
 
-pchecker = ProfanityChecker()
+try:
+    pchecker = ProfanityChecker()
+except:
+    log.warn("FAILED TO INITIALIZE PROFANITY CHECKER")
 
 def check_profanity(text: str) -> bool:
     return pchecker.contains_profanity(text)
