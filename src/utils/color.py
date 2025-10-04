@@ -22,18 +22,19 @@ class Color:
     def bg(self) -> str:
         if self.color_code == -1:
             return ""
-        return f"\u001b[48;5;{self.color_code}m"
+        return f"\x1b[48;5;{self.color_code}m"
 
     def fg(self) -> str:
         if self.color_code == -1:
             return ""
-        return f"\u001b[38;5;{self.color_code}m"
+        return f"\x1b[38;5;{self.color_code}m"
 
-    def apply(self,text:str=" ",bg=False) -> str:
-        if bg == True:
-            return self.bg() + text + '\x1b[48;5;0m\x1b[38;5;15m'
+    def apply(self, text: str = "", bg=False, reset=True) -> str:
+        color = self.bg() if bg else self.fg()
+        if reset:
+            return f"{color}{text}\x1b[0m"
         else:
-            return self.fg() + text + '\x1b[48;5;0m\x1b[38;5;15m'
+            return f"{color}{text}"
 
 RED = Color(9)
 DARK_RED = Color(1)
@@ -61,4 +62,4 @@ DARK_GRAY = Color(8)
 WHITE = Color(15)
 BLACK = Color(0)
 
-RESET = Color(15).fg() + Color(0).bg()
+RESET = "\x1b[0m"
