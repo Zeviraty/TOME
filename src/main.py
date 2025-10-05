@@ -39,12 +39,12 @@ def handle_client(client_socket, addr,debug):
 
 def main(server,debug):
     global id
-    threading.Thread(target=worldThread).start()
+    threading.Thread(target=worldThread,daemon=True).start()
     while True:
         client, addr = server.accept()
         log.info(f"Accepted connection from: {addr[0]}:{addr[1]} id: {id + 1}")
         id += 1
-        client_handler = threading.Thread(target=handle_client, args=(client,addr,debug))
+        client_handler = threading.Thread(target=handle_client, args=(client,addr,debug),daemon=True)
         try:
             client_handler.start()
         except BrokenPipeError:
@@ -68,6 +68,9 @@ def cmd(bind = "0.0.0.0", port = 2323, debug=False):
         log.info("Closing server...")
         for client in clients:
             client.disconnect("Server closed by admin.")
+        exit(0)
+    except Exception as e:
+        log.error("Server crashed with error: "+e)
 
 if __name__ == "__main__":
     cmd()
