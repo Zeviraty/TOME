@@ -29,7 +29,9 @@ run:
 
 updatelibs:
 	@$(PYTHON) -m pip install -r requirements.txt --break-system-packages
-	curl -s https://raw.githubusercontent.com/zeviraty/zte/main/main.py -o tools/map-editor/zte.py
+ifeq ($(DOCKER),0)
+        curl -s https://raw.githubusercontent.com/zeviraty/zte/main/main.py -o tools/map-editor/zte.py
+endif
 
 clean:
 	rm -rf logs/*.log
