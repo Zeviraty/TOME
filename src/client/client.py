@@ -10,7 +10,7 @@ import sending
 import client.telnet as telnet
 
 class Client:
-    def __init__(self, client: socket.socket, addr: tuple, id: int, remove_callback) -> None:
+    def __init__(self, client: socket.socket, addr: tuple, id: int, remove_callback, debug=False) -> None:
         self.client: socket.socket = client
         self.addr: tuple = addr
         self.x: int = 0
@@ -26,6 +26,7 @@ class Client:
         self.character: dict = {}
         self.conn = db.get()
         self.remove_callback = remove_callback
+        self.debug: bool = debug
     
     def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
         menu = " " + YELLOW.apply(DARK_BLUE.apply(f'{name}:\n',bg=True))

@@ -43,7 +43,7 @@ def mainmenu(client):
     while True:
         if client.disconnected:
             return
-        if len(client.user) == 0:
+        if client.user != None and len(client.user) == 0:
             client.disconnect()
             return
         selected = client.menu(
@@ -112,7 +112,7 @@ def mainmenu(client):
                 else:
                     client.send("Not the name of a character or a command.")
 
-def login(client, player:str|None=None,gmcp:bool = True, amount=0) -> None:
+def login(client, player:str|None=None,gmcp:bool = True, amount=0,askpassword=False) -> None:
     if client.disconnected:
         return
     if amount > 5:
@@ -134,7 +134,7 @@ def login(client, player:str|None=None,gmcp:bool = True, amount=0) -> None:
     passwords = client.conn.execute("SELECT password FROM accounts WHERE name = ?;",(username,)).fetchone()
 
     if player != None:
-        if not passwords:
+        if not passwords and askpassword:
             password = client.input(f"New password for {player}: ",echo=False)
             client.conn.execute("INSERT INTO accounts (name, password) VALUES (?, ?)", (player,str(hashlib.sha256(password.encode()).digest())))
             client.conn.commit()
@@ -142,9 +142,10 @@ def login(client, player:str|None=None,gmcp:bool = True, amount=0) -> None:
         client.user = client.conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
         log.info(f"Logged in as: {client.username}",client.td)
         client.td = client.username
-        privileges = client.conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(client.user[0],)).fetchall()
-        for i in privileges:
-            client.privileges.append(i[0])
+        if askpassword:
+            privileges = client.conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(client.user[0],)).fetchall()
+            for i in privileges:
+                client.privileges.append(i[0])
         return
 
     if passwords:
@@ -165,7 +166,7 @@ def login(client, player:str|None=None,gmcp:bool = True, amount=0) -> None:
                 client.privileges.append(i[0])
         else:
             client.send("Wrong password.")
-            login(client,False, amount= amount + 1)
+            login(client, gmcp=False, amount= amount + 1)
 
     else:
         create = client.yn("Account does not exist, do you want to create it? ",preferred_option="n")
