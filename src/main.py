@@ -22,7 +22,7 @@ def remove_client(client):
 
 def handle_client(client_socket, addr,debug):
     global id
-    client = Client(client_socket, addr, id, remove_client)
+    client = Client(client_socket, addr, id, remove_client, debug)
     clients.append(client)
     client.send(RESET)
     client.send(banners.generate("TOME"))
@@ -33,7 +33,7 @@ def handle_client(client_socket, addr,debug):
         conn = db.get()
         debug_player = os.getenv("TOME_DEBUG_USER", "admin")
 
-        mm.login(client,debug_player)
+        mm.login(client,debug_player,askpassword=True)
     mm.mainmenu(client)
     remove_client(client)
 
@@ -62,6 +62,8 @@ def cmd(bind = "0.0.0.0", port = 2323, debug=False):
     server.bind((bind, port))
     server.listen(5)
     log.info(f"Listening on port {bind} : {port}")
+    if debug == True:
+        log.warn("DEBUG MODE ENABLED")
     try:
         main(server,debug)
     except KeyboardInterrupt:
