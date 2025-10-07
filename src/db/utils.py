@@ -56,6 +56,9 @@ def init_db(dobackup=True, clickecho=False):
     else:
         print("Initializing database...")
 
+    if not os.path.exists("db/backups"):
+        os.mkdir("db/backups")
+
     if dobackup:
         backup_db()
 
