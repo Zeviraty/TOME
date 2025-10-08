@@ -50,7 +50,7 @@ del INVERSE_TELNET[bytes([2])]
 
 def send(client, content: str = "") -> None:
     message: bytes = b""
-    if client.debug == True:
+    if client.showtelnet == True:
         client.send("Sending telnet commands: "+content)
     for i in content.replace("\\","").split(" "):
         if i in TELNET_COMMANDS.keys():
@@ -132,7 +132,7 @@ def get(client) -> dict:
 
     if telnet_log:
         gmcp_data["telnet"] = telnet_log
-    if client.debug == True:
+    if client.showtelnet == True:
         client.send("telnet_log: "+str(telnet_log))
 
     return gmcp_data
