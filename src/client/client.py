@@ -158,7 +158,10 @@ class Client:
             else:
                 if echo == True and self.mudclient["client"] != "UNKNOWN":
                     if "client" in self.mudclient.keys() and self.mudclient['client'] == "Mudlet":
-                        self.send(message+" "+DARK_YELLOW.apply(response).strip())
+                        if message != "":
+                            self.send(message+" "+DARK_YELLOW.apply(response).strip())
+                        else:
+                            self.send(DARK_YELLOW.apply(response))
                     else:
                         self.send(DARK_YELLOW.apply(response).strip())
 

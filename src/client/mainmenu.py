@@ -109,6 +109,7 @@ def mainmenu(client):
                     while False in id:
                         id.remove(False)
                     attributes = client.conn.execute("SELECT * FROM character_attributes WHERE character_id = ?;",(id[0],)).fetchall()
+                    break
                 else:
                     client.send("Not the name of a character or a command.")
 
