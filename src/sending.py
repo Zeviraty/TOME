@@ -4,11 +4,16 @@ class Message:
         self.sender_id = sender_id
         self.message = message
 
+    def __repr__(self):
+        return str(self.message)
+
 class Sender:
     def __init__(self):
         self.messages = []
 
-    def send(self, message):
+    def send(self, message, forced=False):
+        if message in ([],{},"") and not forced:
+            return
         self.messages.append(message)
 
     def receive(self, object_id):
@@ -33,3 +38,10 @@ def send(*args, **kwargs):
 def receive(*args, **kwargs):
     global sender
     return sender.receive(*args,**kwargs)
+
+def receive_block(*args, **kwargs):
+    global sender
+    recv = sender.receive(*args,**kwargs)
+    while recv == None:
+        recv = sender.receive(*args,**kwargs)
+    return recv
