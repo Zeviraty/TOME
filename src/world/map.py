@@ -1,18 +1,5 @@
 from types import NoneType
-from utils.color import Color
 from exceptions import CharLenError, OutsideOfMapBoundsException
-
-class Char:
-    def __init__(self,text:str = "", fg: Color=Color(232), bg: Color=Color(-1)):
-        if len(text) != 1:
-            raise CharLenError(len(text))
-        self.text = text
-        self.fg = fg
-        self.bg = bg
-
-    def __repr__(self):
-        return self.bg.apply(self.fg.apply(self.text,True)) + "\033[0m"
-
 class Object:
     def __init__(self, char:Char,metadata:dict=None):
         if metadata == None:
@@ -32,6 +19,7 @@ class Player(Object):
             metadata = {}
         self.char = Char("@")
         self.metadata = metadata
+from utils.color import Char
 
 class TileOptions:
     def __init__(self, **kwargs):

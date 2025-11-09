@@ -36,6 +36,25 @@ class Color:
         else:
             return f"{color}{text}"
 
+def apply(fg:Color=None,bg:Color=None,text=""):
+    if fg==None and bg==None:
+        return text
+    elif fg==None:
+        return bg.apply(text,True)
+    else:
+        return bg.apply(fg.apply(text),True)
+
+class Char:
+    def __init__(self,text:str = "", fg: Color=Color(232), bg: Color=Color(-1)):
+        if len(text) != 1:
+            raise CharLenError(len(text))
+        self.text = text
+        self.fg = fg
+        self.bg = bg
+
+    def __repr__(self):
+        return apply(self.fg,self.bg,self.text) + "\033[0m"
+
 RED = Color(9)
 DARK_RED = Color(1)
 
