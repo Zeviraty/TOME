@@ -14,7 +14,11 @@
   </a>
 </div>
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://choosealicense.com/licenses/gpl-3.0/)
+<p align="center">
+  <a href="https://choosealicense.com/licenses/gpl-3.0/">
+    <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="GPLv3 License">
+  </a>
+</p>
 
 # About TOME
 
