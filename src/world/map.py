@@ -1,24 +1,6 @@
 from types import NoneType
-class Object:
-    def __init__(self, char:Char,metadata:dict=None):
-        if metadata == None:
-            metadata = {}
-        self.char = char
-        self.metadata = metadata
-
-    def __repr__(self):
-        return str(self.char)
-
-    def update(self):
-        pass
-
-class Player(Object):
-    def __init__(self,metadata:dict=None):
-        if metadata == None:
-            metadata = {}
-        self.char = Char("@")
-        self.metadata = metadata
 from exceptions import CharLenError, OutsideOfMapBoundsException, RoomNotFoundError
+from world.entities.entity import Entity 
 from utils.color import Char
 
 class TileOptions:
