@@ -41,6 +41,5 @@ Everything is in configuration files under the config/ directory:
 
 ## License
 
-This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License.  
-You may remix, adapt, and share with credit, but not use commercially.  
-Full license: [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+This project is licensed under the GNU General Public License v3.0 License.
+Full license: [GPL-3.0](https://choosealicense.com/licenses/gpl-3.0/)
