@@ -8,6 +8,7 @@ import utils.config
 import client.mainmenu as mm
 import sending
 import client.telnet as telnet
+from world.entities.character import Character
 
 class Client:
     def __init__(self, client: socket.socket, addr: tuple, id: int, remove_callback, debug=False, showtelnet=False) -> None:
@@ -23,7 +24,7 @@ class Client:
         self.user: tuple = ()
         self.td: int | str = id
         self.privileges: list = []
-        self.character: dict = {}
+        self.character: Character | None = None
         self.conn = db.get()
         self.remove_callback = remove_callback
         self.debug: bool = debug
