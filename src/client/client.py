@@ -207,7 +207,7 @@ class Client:
 
     def send(self, content: str = "", lines=0,end="\n") -> None:
         try:
-            sending = ("\n"*lines)+content+end
+            sending = ("\n"*lines)+str(content)+end
             self.client.send(sending.encode())
         except (BrokenPipeError, OSError):
             self.disconnect()
