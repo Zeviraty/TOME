@@ -25,30 +25,42 @@ def start(testing_mode=False):
 def warn(data, name:str="+"):
     if testing:
         return
-    data = f"[{datetime.today().strftime('%H:%M:%S')}] \033[33m[WARN] [{name}] {data}"
-    open('logs/'+current_log,'a').write(data.replace("\033[33m",'')+"\n")
-    print(str(data)+"\033[0m")
+    display = ""
+    for i in data.split("\n"):
+        display += f"[{datetime.today().strftime('%H:%M:%S')}] \033[33m[WARN] [{name}] {i}\033[0m\n"
+    display.strip()
+    open('logs/'+current_log,'a').write(display.replace("\033[33m",''))
+    print(str(display)+"\033[0m",end="")
 
 def error(data, name:str="+"):
     if testing:
         return
-    data = f"[{datetime.today().strftime('%H:%M:%S')}] \033[31m[ERROR] [{name}] {data}"
-    open('logs/'+current_log,'a').write(data.replace("\033[31m",'')+"\n")
-    print(str(data)+"\033[0m")
+    display = ""
+    for i in data.split("\n"):
+        display += f"[{datetime.today().strftime('%H:%M:%S')}] \033[31m[ERROR] [{name}] {i}\033[0m\n"
+    display.strip()
+    open('logs/'+current_log,'a').write(display.replace("\033[31m",''))
+    print(str(display)+"\033[0m",end="")
 
 def info(data, name:str="+"):
     if testing:
         return
-    data = f"[{datetime.today().strftime('%H:%M:%S')}] [INFO] [{name}] {data}"
-    open('logs/'+current_log,'a').write(str(data)+"\n")
-    print(str(data)+"\033[0m")
+    display = ""
+    for i in data.split("\n"):
+        display += f"[{datetime.today().strftime('%H:%M:%S')}] [INFO] [{name}] {i}\033[0m\n"
+    display.strip()
+    open('logs/'+current_log,'a').write(str(display))
+    print(str(display)+"\033[0m",end="")
 
 def disconnect(data, name:str="+"):
     if testing:
         return
-    data = f"[{datetime.today().strftime('%H:%M:%S')}] \033[34m[DISCONNECT] [{name}] {data}"
-    open('logs/'+current_log,'a').write(data.replace("\033[34m",'')+"\n")
-    print(str(data)+"\033[0m")
+    display = ""
+    for i in data.split("\n"):
+        display = f"[{datetime.today().strftime('%H:%M:%S')}] \033[34m[DISCONNECT] [{name}] {i}\033[0m\n"
+    display.strip()
+    open('logs/'+current_log,'a').write(display.replace("\033[34m",''))
+    print(str(display)+"\033[0m",end="")
 
 
 
