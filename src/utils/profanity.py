@@ -24,7 +24,7 @@ class ProfanityChecker:
 try:
     pchecker = ProfanityChecker()
 except:
-    log.warn("FAILED TO INITIALIZE PROFANITY CHECKER")
+    log.warn("FAILED TO INITIALIZE PROFANITY CHECKER",name="profanity")
 
 def check_profanity(text: str) -> bool:
     return pchecker.contains_profanity(text)

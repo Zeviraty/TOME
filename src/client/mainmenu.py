@@ -141,7 +141,7 @@ def login(client, player:str|None=None,gmcp:bool = True, amount=0,askpassword=Fa
             client.conn.commit()
         client.username = username
         client.user = client.conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-        log.info(f"Logged in as: {client.username}",client.td)
+        log.info(f"Logged in as: {client.username}",name=client.td)
         client.td = client.username
         if askpassword:
             privileges = client.conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(client.user[0],)).fetchall()
@@ -160,7 +160,7 @@ def login(client, player:str|None=None,gmcp:bool = True, amount=0,askpassword=Fa
             client.send(f"Logged in as: {username}.\n")
             client.username = username
             client.user = client.conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-            log.info(f"Logged in as: {client.username}",client.td)
+            log.info(f"Logged in as: {client.username}",name=client.td)
             client.td = client.username
             privileges = client.conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(client.user[0],)).fetchall()
             for i in privileges:

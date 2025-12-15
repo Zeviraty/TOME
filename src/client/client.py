@@ -134,7 +134,7 @@ class Client:
                 else:
                     return True
         except BrokenPipeError:
-            log.warn("broke pipe",self.td)
+            log.warn("broke pipe",name=str(self.td))
             self.conn.close()
             self.disconnect()
             exit(0)
@@ -247,12 +247,12 @@ class Client:
             self.client.close()
         except:
             pass
-        log.disconnect(message,self.td)
+        log.disconnect(message,name=str(self.td))
         self.remove_callback(self)
 
     def warn(self,reason):
         self.disconnect(reason)
-        log.warn("broke pipe",self.td)
+        log.warn("broke pipe",name=str(self.td))
         next_id = self.conn.execute('SELECT COALESCE(MAX(id), 0) + 1 FROM warnings WHERE account_id = ?', (self.user[0],)).fetchone()[0]
 
         self.conn.execute('INSERT INTO warnings (id, account_id, reason) VALUES (?, ?, ?)', (next_id, self.user[0], reason))

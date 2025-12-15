@@ -1,7 +1,7 @@
 import toml
 import os
 
-def get(path:str, key:str="all") -> dict:
+def get(path:str, key:str="all"):
     if not path.endswith(".toml"):
         return {}
     y = toml.loads(open(os.path.join("config/",path), 'r').read())
