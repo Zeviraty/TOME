@@ -22,41 +22,45 @@ def start(testing_mode=False):
         else:
             current_log += "1"
 
-def warn(data, name:str="+"):
+def warn(*text, name:str="+"):
+    text = " ".join(text)
     if testing:
         return
     display = ""
-    for i in data.split("\n"):
+    for i in text.split("\n"):
         display += f"[{datetime.today().strftime('%H:%M:%S')}] \033[33m[WARN] [{name}] {i}\033[0m\n"
     display.strip()
     open('logs/'+current_log,'a').write(display.replace("\033[33m",''))
     print(str(display)+"\033[0m",end="")
 
-def error(data, name:str="+"):
+def error(*text, name:str="+"):
+    text = " ".join(text)
     if testing:
         return
     display = ""
-    for i in data.split("\n"):
+    for i in text.split("\n"):
         display += f"[{datetime.today().strftime('%H:%M:%S')}] \033[31m[ERROR] [{name}] {i}\033[0m\n"
     display.strip()
     open('logs/'+current_log,'a').write(display.replace("\033[31m",''))
     print(str(display)+"\033[0m",end="")
 
-def info(data, name:str="+"):
+def info(*text, name:str="+"):
+    text = " ".join(text)
     if testing:
         return
     display = ""
-    for i in data.split("\n"):
+    for i in text.split("\n"):
         display += f"[{datetime.today().strftime('%H:%M:%S')}] [INFO] [{name}] {i}\033[0m\n"
     display.strip()
     open('logs/'+current_log,'a').write(str(display))
     print(str(display)+"\033[0m",end="")
 
-def disconnect(data, name:str="+"):
+def disconnect(*text, name:str="+"):
+    text = " ".join(text)
     if testing:
         return
     display = ""
-    for i in data.split("\n"):
+    for i in text.split("\n"):
         display = f"[{datetime.today().strftime('%H:%M:%S')}] \033[34m[DISCONNECT] [{name}] {i}\033[0m\n"
     display.strip()
     open('logs/'+current_log,'a').write(display.replace("\033[34m",''))
@@ -64,29 +68,32 @@ def disconnect(data, name:str="+"):
 
 
 
-def pwarn(data, name:str="+"):
+def pwarn(*text, name:str="+"):
+    text = " ".join(text)
     if testing:
         return
     prefix = f"[{datetime.today().strftime('%H:%M:%S')}] \033[33m[WARN] [{name}]"
-    open('logs/'+current_log,'a').write(data.replace("\033[33m",'')+"\n")
+    open('logs/'+current_log,'a').write(text.replace("\033[33m",'')+"\n")
     print(prefix,end=" ")
-    pp(data)
+    pp(text)
     print("\033[0m",end=" ")
 
-def perror(data, name:str="+"):
+def perror(*text, name:str="+"):
+    text = " ".join(text)
     if testing:
         return
     prefix = f"[{datetime.today().strftime('%H:%M:%S')}] \033[31m[ERROR] [{name}]"
-    open('logs/'+current_log,'a').write(data.replace("\033[31m",'')+"\n")
+    open('logs/'+current_log,'a').write(text.replace("\033[31m",'')+"\n")
     print(prefix,end=" ")
-    pp(data)
+    pp(text)
     print("\033[0m",end=" ")
 
-def pinfo(data, name:str="+"):
+def pinfo(*text, name:str="+"):
+    text = " ".join(text)
     if testing:
         return
     prefix = f"[{datetime.today().strftime('%H:%M:%S')}] [INFO] [{name}]"
-    open('logs/'+current_log,'a').write(str(data)+"\n")
+    open('logs/'+current_log,'a').write(str(text)+"\n")
     print(prefix,end=" ")
-    pp(data)
+    pp(text)
     print("\033[0m",end=" ")
