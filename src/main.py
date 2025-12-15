@@ -2,7 +2,6 @@ import socket
 import threading
 import banners
 from utils.color import RESET
-import db.utils as db
 import utils.logging as log
 import click
 import os
@@ -31,7 +30,6 @@ def handle_client(client_socket, addr,debug, telnet):
     if not debug:
         mm.login(client)
     else:
-        conn = db.get()
         debug_player = os.getenv("TOME_DEBUG_USER", "admin")
 
         mm.login(client,debug_player,askpassword=True)
@@ -77,7 +75,7 @@ def cmd(bind = "0.0.0.0", port = 2323, debug=False, telnet=False):
             client.disconnect("Server closed by admin.")
         return
     except Exception as e:
-        log.error("Server crashed with error: "+e)
+        log.error("Server crashed with error:",e)
 
 if __name__ == "__main__":
     cmd()
