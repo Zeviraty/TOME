@@ -22,7 +22,8 @@
 
 # About TOME
 
-> [!WARNING] This project is unfinished and in alpha, come help out!
+> [!WARNING]
+> This project is unfinished and in alpha — come help out!
 
 TOME is a multi-user text engine designed to be used with traditional mud clients.
 This is the successor to my mud engine ARMUD
