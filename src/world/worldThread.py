@@ -2,8 +2,11 @@ import world.map as m
 import sending
 import utils.logging as log
 
-global world_map
-world_map = m.Map
+global maps
+maps = {
+    'overworld': m.Map.from_config("OVERWORLD")
+}
+print(maps["overworld"])
 
 def worldThread():
     while True:
@@ -19,5 +22,5 @@ def worldThread():
                         elif recv.message["data"]["map"] not in maps.keys():
                             log.warn(f"{recv.sender_id} tried to access unknown map: {recv.message['data']['map']}",name="World")
                         else:
-                            print("getting map TODO")
-        pass
+                            msg = sending.Message(recv.sender_id,"World",maps[recv.message["data"]["map"]].get_room(recv.message["data"]["roomid"]))
+                            sending.send(msg)

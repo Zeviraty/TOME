@@ -55,6 +55,12 @@ class Char:
     def __repr__(self):
         return apply(self.fg,self.bg,self.text) + "\033[0m"
 
+    def dump(self):
+        return {"text": self.text,
+                "fg": self.fg.__dict__,
+                "bg": self.bg.__dict__
+                }
+
 RED = Color(9)
 DARK_RED = Color(1)
 

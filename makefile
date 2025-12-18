@@ -72,3 +72,5 @@ distcheck:
 	@echo "distcheck completed successfully!"
 	@rm -rf TOME.tar.gz
 
+mapjq:
+	@$(foreach file, $(wildcard config/maps/*), cat $(file) | jq '.' > tmp.txt && mv tmp.txt $(file);)

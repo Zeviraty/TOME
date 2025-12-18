@@ -2,6 +2,7 @@ from types import NoneType
 from exceptions import CharLenError, OutsideOfMapBoundsException, RoomNotFoundError
 from world.entities.entity import Entity 
 from utils.color import Char
+import json
 
 class TileOptions:
     def __init__(self, **kwargs):
@@ -15,12 +16,20 @@ class Tile:
 
     def __repr__(self):
         return str(self.char)
+    
+    def dump(self):
+        return {"char": self.char.dump(),
+                "opts": self.tileoptions.__dict__ if self.tileoptions != None else None
+                }
 
 class Exit:
     def __init__(self,x:int,y:int,roomid:str):
         self.x = x
         self.y = y
         self.roomid = roomid
+
+    def dump(self):
+        return self.__dict__
 
 class Room:
     def __init__(self,x:int,y:int,base:Tile,name:str):
@@ -67,6 +76,44 @@ class Room:
             rep += "".join(row) + "\n"
         return rep
 
+    def dump(self):
+        tiles = []
+        exits = [e.dump() for e in self.exits]
+        last_tile = None
+        run_count = 0
+        for row in self.tiles:
+            for tile in row:
+                t = tile.dump()
+                if last_tile is None:
+                    last_tile = t
+                    run_count = 1
+                    continue
+                if t == last_tile:
+                    run_count += 1
+                else:
+                    lt = dict(last_tile)
+                    lt["count"] = run_count
+                    tiles.append(lt)
+                    last_tile = t
+                    run_count = 1
+        if last_tile is not None:
+            lt = dict(last_tile)
+            lt["count"] = run_count
+            tiles.append(lt)
+        return {
+            "name": self.name,
+            "x": self.x,
+            "y": self.y,
+            "tiles": tiles,
+            "exits": exits,
+        }
+
+    @staticmethod
+    def from_dump(dump:dict):
+        r = Room(dump["x"],dump["y"],Char(" "),dump["name"])
+        dump["tiles"]
+        return r
+
 class Map:
     def __init__(self):
         self.rooms = {}
@@ -79,3 +126,17 @@ class Map:
             return self.rooms[roomid]
         else:
             raise RoomNotFoundError(roomid)
+
+    def dump(self):
+        tmp = {}
+        for k,v in self.rooms.items():
+            tmp[k] = v.dump()
+        return tmp
+
+    @staticmethod
+    def from_config(config_file:str):
+        rmap = Map()
+        d = json.load(open(f"config/maps/{config_file}.mf",'r'))
+        for k,v in d.items():
+            rmap.rooms[k] = Room.from_dump(v)
+        return rmap
