@@ -1,9 +1,9 @@
-from . import Test, TestingClient
+from tests import Test, TestingClient
 from client.mainmenu import login
 
 class GmcpTest(Test):
     def __init__(self):
-        super().__init__("Gmcp test")
+        super().__init__("basicTest")
 
     def run(self) -> bool:
         client = TestingClient(bytesinbuffer=True)
@@ -13,3 +13,6 @@ class GmcpTest(Test):
             return True
         else:
             return False
+
+TESTS = [GmcpTest]
+NAME = "Gmcp"
