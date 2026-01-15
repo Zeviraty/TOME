@@ -1,4 +1,4 @@
-from world.entities.entity import Entity
+from .entity import Entity
 
 class Character(Entity):
     def __init__(self,metadata:dict=None):

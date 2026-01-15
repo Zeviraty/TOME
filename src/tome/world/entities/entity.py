@@ -1,4 +1,4 @@
-from utils.color import Char
+from tome.utils.color import Char
 
 class Entity:
     def __init__(self,x:int,y:int, char:Char,metadata:dict=None):

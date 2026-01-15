@@ -1,0 +1,18 @@
+[project]
+name = "tome"
+dynamic = ["dependencies"]
+authors = [ {name = "Zevvi", email = "Zeviraty@gmail.com"} ]
+description = "A modular mud engine"
+readme = "README.md"
+license-files = ["LICENCSE"]
+version = "0.0.1"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+tome = "tome.main:cmd"

@@ -1,6 +1,6 @@
 import os
 import re
-import utils.logging as log
+from . import logging as log
 
 class ProfanityChecker:
     def __init__(self, profanity_dir="config/profanity") -> None:
