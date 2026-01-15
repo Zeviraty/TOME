@@ -1,17 +1,11 @@
-import socket
-import json
-import threading
-import db.utils as db
 import hashlib
 from utils.color import *
-from utils.profanity import check_profanity
-import utils.logging as log
-import utils.config
-import client.mainmenu as mm
-import client.telnet as telnet
+import tome.utils.logging as log
+import tome.utils.config as config
+import tome.client.telnet as telnet
 
 def racemenu(client):
-    races = {entry['name']: entry['subs'] for entry in utils.config.get_dir("races",ls=True)}
+    races = {entry['name']: entry['subs'] for entry in config.get_dir("races",ls=True)}
     keys = list(races.keys())
     keys.append("Back")
     race: str = str(client.menu(
@@ -60,7 +54,7 @@ def mainmenu(client):
             case 0:
                 client.send("New character\n")
                 menus = [
-                    {"name":"Class","type":"options","options":utils.config.get_dir("classes",key="name",ls=True)},
+                    {"name":"Class","type":"options","options":config.get_dir("classes",key="name",ls=True)},
                     {"name":"Race","type":"custom","function":racemenu},
                     {"name":"Name","type":str},
                     {"name":"Gender","type":"options","options":["Male","Female","Non-Binary"]},

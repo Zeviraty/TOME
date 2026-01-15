@@ -1,5 +1,3 @@
-import sqlite3
-from datetime import datetime
 import shutil,os
 import click
 from trogon import tui
