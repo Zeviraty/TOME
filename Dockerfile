@@ -8,6 +8,7 @@ COPY configure configure
 COPY makefile makefile
 COPY README.md README.md
 COPY requirements.txt requirements.txt
+COPY pyproject.toml pyproject.toml
 COPY config/ config/
 RUN chmod +x configure
 RUN ./configure
