@@ -21,8 +21,7 @@ install:
 	@chmod +x ./dbcli ./run.sh ./clean
 	@mkdir logs -p
 	@$(PYTHON) src/tome/db/cli.py full-init --force
-	@mkdir -p ~/bin && echo "$(PYTHON) $(CURDIR)/src/tome \$$@" > ~/bin/$(NAME) && chmod +x ~/bin/$(NAME)
-	@echo "Make sure that ~/bin is in your path"
+	@pip install -e .
 
 run:
 	$(PYTHON) src/tome
