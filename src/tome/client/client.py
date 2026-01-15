@@ -1,11 +1,11 @@
 import socket
-from tome.utils.color import *
-import tome.db.utils as db
-from tome.utils.profanity import check_profanity
-import tome.utils.logging as log
-import tome.sending as sending
+from utils.color import *
+import db.utils as db
+from utils.profanity import check_profanity
+import utils.logging as log
+import sending as sending
 from . import telnet as telnet
-from tome.world.entities.character import Character
+from world.entities.character import Character
 
 class Client:
     def __init__(self, client: socket.socket, addr: tuple, id: int, remove_callback, debug=False, showtelnet=False) -> None:

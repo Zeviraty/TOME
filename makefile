@@ -15,17 +15,17 @@ install:
 	$(MAKE) updatelibs
 	@touch clean
 	@touch dbcli
-	@echo '$(PYTHON) src/db/cli.py $$@' > dbcli
+	@echo '$(PYTHON) src/tome/db/cli.py $$@' > dbcli
 	@echo make run > run.sh
 	@echo make clean > clean
 	@chmod +x ./dbcli ./run.sh ./clean
 	@mkdir logs -p
-	@$(PYTHON) src/db/cli.py full-init --force
-	@mkdir -p ~/bin && echo "$(PYTHON) $(CURDIR)/src/main.py \$$@" > ~/bin/$(NAME) && chmod +x ~/bin/$(NAME)
+	@$(PYTHON) src/tome/db/cli.py full-init --force
+	@mkdir -p ~/bin && echo "$(PYTHON) $(CURDIR)/src/tome \$$@" > ~/bin/$(NAME) && chmod +x ~/bin/$(NAME)
 	@echo "Make sure that ~/bin is in your path"
 
 run:
-	$(PYTHON) src/main.py
+	$(PYTHON) src/tome
 
 updatelibs:
 	@$(PYTHON) -m pip install -r requirements.txt --break-system-packages

@@ -1,8 +1,8 @@
 import hashlib
 from utils.color import *
-import tome.utils.logging as log
-import tome.utils.config as config
-import tome.client.telnet as telnet
+import utils.logging as log
+import utils.config as config
+import client.telnet as telnet
 
 def racemenu(client):
     races = {entry['name']: entry['subs'] for entry in config.get_dir("races",ls=True)}

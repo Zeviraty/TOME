@@ -1,15 +1,15 @@
 import socket
 import threading
 import banners
-from tome.utils.color import RESET
-import tome.utils.logging as log
+from utils.color import RESET
+import utils.logging as log
 import click
 import os
-from tome.client.client import Client
-import tome.client.mainmenu as mm
-import tome.sending as sending
-from tome.world.worldThread import worldThread
-from tome.client.game import play
+from client.client import Client
+import client.mainmenu as mm
+import sending as sending
+from world.worldThread import worldThread
+from client.game import play
 
 clients: list[Client] = []
 id = 0

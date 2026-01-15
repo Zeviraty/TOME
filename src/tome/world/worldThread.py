@@ -1,6 +1,6 @@
 from . import map as m
-import tome.sending as sending
-import tome.utils.logging as log
+import sending as sending
+import utils.logging as log
 
 global maps
 maps = {

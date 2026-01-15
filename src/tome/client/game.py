@@ -1,6 +1,6 @@
-import tome.utils.import_lib as il
-import tome.utils.config as conf
-import tome.utils.logging as log
+import utils.import_lib as il
+import utils.config as conf
+import utils.logging as log
 import re
 
 def parse_command(cmd, client):

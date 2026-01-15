@@ -1,6 +1,6 @@
-from tome.exceptions import OutsideOfMapBoundsException, RoomNotFoundError
-from tome.world.entities.entity import Entity 
-from tome.utils.color import Char
+from exceptions import OutsideOfMapBoundsException, RoomNotFoundError
+from world.entities.entity import Entity 
+from utils.color import Char
 import json
 
 class TileOptions:
