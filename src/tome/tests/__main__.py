@@ -51,7 +51,7 @@ def progress_printer(start_time, stop_event):
 
 def main():
     spaces = load_namespaces()
-    os.chdir("..")
+    os.chdir("../..")
     failed = 0
     all_start = time.perf_counter()
 
