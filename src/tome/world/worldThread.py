@@ -4,7 +4,8 @@ import tome.utils.logging as log
 
 global maps
 maps = {
-    'overworld': m.Map.from_config("OVERWORLD")
+    #'overworld': m.Map.from_config("OVERWORLD")
+    # TODO LOAD ALL MAPS
 }
 
 def worldThread():
