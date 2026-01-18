@@ -6,7 +6,6 @@ global maps
 maps = {
     'overworld': m.Map.from_config("OVERWORLD")
 }
-print(maps["overworld"])
 
 def worldThread():
     while True:
