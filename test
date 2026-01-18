@@ -1,3 +1,3 @@
-cd src
+cd src/tome
 python3 -m tests
 cd - > /dev/null
