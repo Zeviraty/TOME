@@ -8,6 +8,7 @@ from . import telnet as telnet
 from tome.world.entities.character import Character
 import sqlite3
 import typing
+import collections.abc as abc
 
 class Client:
     '''
@@ -179,6 +180,11 @@ class Client:
         -------
         dict[str, Any]
             All the selected options indexed by menu name
+
+        Raises
+        ------
+        ValueError
+            if keys are missing, or the wrong type
         '''
         current_menu = 0
         chosen = {}
@@ -186,9 +192,13 @@ class Client:
             page = pages[current_menu]
             if "type" not in page or "name" not in page:
                 raise ValueError("Page should have 'name' & 'type' keys")
+            if str not in (type(page['name']), type(page['type'])):
+                raise ValueError("'name' and 'type' keys should be strings")
             if page["type"] == "options":
                 if "options" not in page:
                     raise ValueError("Page with type 'options' should have a 'options' key")
+                if type(page["options"]) != list:
+                    raise ValueError("'options' key should be a list")
                 options = page["options"]
                 if current_menu != 0:
                     options.append("Back")
@@ -205,13 +215,15 @@ class Client:
             elif page["type"] == "custom":
                 if "function" not in page:
                     raise ValueError("Page with type 'custom' should have a 'function' key")
+                if not page['function'] is typing.Callable:
+                    raise ValueError("'function' key should be Callable")
                 recv = page["function"](self)
                 if recv == "Back":
                     current_menu -= 1
                 else:
                     chosen = {**recv,**chosen}
                     current_menu += 1
-            elif page["type"] == str:
+            elif page["type"] == 'str':
                 recv = self.input(f"Input: {page['name']}{' (or back)' if current_menu != 0 else ''}: ")
                 if recv.lower() == "back" and current_menu != 0:
                     current_menu -= 1
@@ -219,11 +231,19 @@ class Client:
                     chosen[page["name"]] = recv
                     current_menu += 1
             else:
-                pass
+                raise ValueError("Page type needs to be: 'options', 'custom' or 'str'")
         return chosen
 
 
     def get(self) -> str:
+        '''
+        Gets basic input from the Client (blocking)
+
+        Returns
+        -------
+        str
+            Input of the Client
+        '''
         if self.disconnected:
             return ""
         try:
@@ -235,6 +255,14 @@ class Client:
             return ""
 
     def bget(self) -> bytes:
+        '''
+        Gets basic input from the Client as raw bytes (blocking)
+
+        Returns
+        -------
+        bytes
+            Input of the Client
+        '''
         if self.disconnected:
             return b""
         try:
@@ -245,7 +273,31 @@ class Client:
         except UnicodeDecodeError:
             return b""
 
-    def yn(self,question:str,preferred_option="y") -> bool:
+    def yn(self,question:str,preferred_option: str ="y") -> bool:
+        '''
+        Displays a yes/no question to the Client
+
+        Parameters
+        ----------
+        question : str
+            Question displayed to the client
+        preferred_option : {'y', 'n'}, optional
+            Needs to be either 'y' or 'n'
+            standard selected option when Client sends an empty message
+
+        Returns
+        -------
+        bool
+            True if answer is 'y'
+            False if answer is 'n'
+
+        Raises
+        ------
+        ValueError
+            if preferred_option is not 'y' or 'n'
+        '''
+        if preferred_option.lower() not in ('y','n'):
+            raise ValueError("'preferred_option' needs to be in ('y', 'n')")
         try:
             preferred_option = preferred_option.lower()
             if preferred_option != "n":
@@ -273,6 +325,23 @@ class Client:
             exit(0)
 
     def input(self, message:str="", echo:bool=True) -> str:
+        '''
+        Gets input from client (similar to default python `input()` function)
+
+        Parameters
+        ----------
+        message : str, optional
+            Message to display (default is '')
+        echo : bool, optional
+            Whether the answer should be echoed back or not
+
+        Returns
+        -------
+        str
+            Input of Client
+        '''
+        if self.mudclient == None:
+            raise ValueError("Input called before client auth")
         try:
             message = message.strip().replace("\n","")
             if self.mudclient["client"] != "UNKNOWN":
@@ -303,65 +372,129 @@ class Client:
                 return response
         except (BrokenPipeError, OSError):
             self.disconnect()
+            return ""
 
     def binput(self,message:str="") -> bytes:
+        '''
+        Send message & get byte input from Client
+
+        Parameters
+        ----------
+        message : str, optional
+            Message to send (default is '')
+
+        Returns
+        -------
+        bytes
+            Client input
+        '''
         try:
             self.send(message)
             return self.bget()
         except (BrokenPipeError, OSError):
             self.disconnect()
-
-    def tinput(self, message: str = "", typed: type = str) -> str | bool:
-        if self.disconnected:
-            return False
-        try:
-            return typed(self.input(message))
-        except:
-            if not self.disconnected:
-                print(f"[{self.td}] Could not type input")
-            return False
-
-    def ltinput(self, message: str = "", typed: type = str, wrongmsg: str = "You needed to input a str."):
-        while not self.disconnected:
-            inp = self.tinput(message, typed)
-            if inp is not False:
-                return inp
-            elif not self.disconnected:
-                self.send(wrongmsg)
-        return None
+            return b''
 
     def bsend(self, content: bytes) -> None:
+        '''
+        Send bytes to Client
+
+        Parameters
+        ----------
+        content : bytes
+            Bytes to send
+        '''
         try:
             self.client.send(content)
         except (BrokenPipeError, OSError):
             self.disconnect()
 
-    def send(self, content: str = "", lines=0,end="\n") -> None:
+    def send(self, content: str = "", lines: int = 0,end: str = "\n") -> None:
+        '''
+        Send string to Client
+
+        Parameters
+        ----------
+        content : str, optional
+            String to send (default is '')
+        lines : int, optional
+            Amount of lines to prepend before content (default is 0)
+        end : str, optional
+            String to append to content (default is '\\n')
+        '''
         try:
             sending = ("\n"*lines)+str(content)+end
             self.client.send(sending.encode())
         except (BrokenPipeError, OSError):
             self.disconnect()
 
-    def sendtable(self, title: str, items: dict, compact: bool = False) -> None:
+    def sendtable(self, title: str, items: dict[str,abc.Sequence]) -> None:
+        '''
+        Send formatted table to Client
+
+        Parameters
+        ----------
+        title : str
+            Title of the table
+        items : dict[str,collections.abc.Sequence]
+            Items of table, formatted as:
+            {'COLUMNNAME': ['ROW1','ROW2']}
+
+        Raises
+        ------
+        ValueError
+            Raised when not all columns have the same number of rows
+        '''
+        if not items:
+            self.send("(no data)")
+            return
+
         keys = list(items.keys())
-        num_rows = len(items[keys[0]]) if keys else 0
+        lengths = {key: len(items[key]) for key in keys}
 
-        self.send(YELLOW.fg() + Color(17).apply(f"{title:<25}", bg=True) + DARK_BLUE.bg())
+        if len(set(lengths.values())) != 1:
+            raise ValueError("All columns must have the same number of rows")
 
-        if compact:
-            for i in range(num_rows):
-                line = " ".join(f"{key}: {items[key][i]}" for key in keys)
-                self.send(line)
-            col_widths = {key: max(len(key), max(len(str(val)) for val in items[key])) for key in keys}
-            header = "  ".join(f"{key:<{col_widths[key]}}" for key in keys)
-            self.send(header)
+        num_rows = next(iter(lengths.values()))
 
-            for i in range(num_rows):
-                row = "  ".join(f"{str(items[key][i]):<{col_widths[key]}}" for key in keys)
-                self.send(row)
+        self.send(
+            YELLOW.fg()
+            + Color(17).apply(f"{title:<25}", bg=True)
+            + DARK_BLUE.bg()
+        )
+
+        for i in range(num_rows):
+            self.send(" ".join(f"{key}: {items[key][i]}" for key in keys))
+
+        col_widths = {
+            key: max(
+                len(key),
+                max(len(str(value)) for value in items[key])
+            )
+            for key in keys
+        }
+
+        header = "  ".join(
+            f"{key:<{col_widths[key]}}" for key in keys
+        )
+        self.send(header)
+
+        for i in range(num_rows):
+            row = "  ".join(
+                f"{str(items[key][i]):<{col_widths[key]}}"
+                for key in keys
+            )
+            self.send(row)
 
     def disconnect(self, message: str = "Disconnected.") -> None:
+        '''
+        Disconnect Client
+
+        Parameters
+        ----------
+        message : str, optional
+            Reason for disconnect (default is 'Disconnected.')
+        '''
         if self.disconnected:
             return
         self.disconnected = True
@@ -380,7 +513,15 @@ class Client:
         log.disconnect(message,name=str(self.td))
         self.remove_callback(self)
 
-    def warn(self,reason):
+    def warn(self,reason: str):
+        '''
+        Give user a waring
+
+        Parameters
+        ----------
+        reason : str
+            Reason for warning
+        '''
         self.disconnect(reason)
         log.warn("broke pipe",name=str(self.td))
         next_id = self.conn.execute('SELECT COALESCE(MAX(id), 0) + 1 FROM warnings WHERE account_id = ?', (self.user[0],)).fetchone()[0]
