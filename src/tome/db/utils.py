@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 import shutil,os
+import click
 
 def resolve_schema_path(schema_name, base_path="db/schemas", ext=".sql"):
     """Convert schema name like 'test.001' into a path like 'db/schemas/test/001-*.sql'."""
