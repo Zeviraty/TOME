@@ -1,4 +1,4 @@
-from .main import cmd
+from tome.main import cmd
 
 if __name__ == "__main__":
     cmd()
