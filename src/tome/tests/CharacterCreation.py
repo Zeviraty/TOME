@@ -1,4 +1,4 @@
-from tests import Test
+from tome.tests import Test
 
 class CreationTest(Test):
     def __init__(self):
