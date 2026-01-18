@@ -1,4 +1,4 @@
-import sending
+import tome.sending as sending
 
 def map(client,arguments):
     msg = sending.Message("World",client.td,{"command":"get_map","data":{"map":"Overworld","x":0,"y":0}})
