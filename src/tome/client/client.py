@@ -10,26 +10,116 @@ import sqlite3
 import typing
 
 class Client:
-    def __init__(self, client: socket.socket, addr: tuple, id: int, remove_callback, debug=False, showtelnet=False) -> None:
-        self.client: socket.socket = client
-        self.addr: tuple = addr
-        self.x: int = 0
-        self.y: int = 0
-        self.gmcp: bool = False
-        self.mudclient: None | list = None
-        self.id: int = id
-        self.disconnected: bool = False
-        self.username: None | str = None
-        self.user: tuple = ()
-        self.td: int | str = id
-        self.privileges: list = []
-        self.character: Character | None = None
-        self.conn = db.get()
+    '''
+    Class representing a single connection to the server.
+
+    Attributes
+    ----------
+    x : int
+        X location of character (TODO: move to Character)
+    y : int
+        Y location of character (TODO: move to Character)
+    gmcp : bool
+        Whether the connection supports GMCP (Generic MUD Communication Protocol).
+    mudclient : dict | None
+        Data of MUD client used by the connection (set by mainmenu).
+    disconnected : bool
+        Whether the client has disconnected.
+    username : str | None
+        Username of the user.
+    user : tuple
+        Raw user data from the database.
+    privileges : list[str]
+        List of privileges the user has.
+    character : Character | None
+        The character the user is controlling.
+    conn : sqlite3.Connection
+        Database connection.
+    client : socket.socket
+        Client socket.
+    addr : tuple[str, int]
+        Address of the connected client.
+    id : int
+        ID of the client.
+    td : int | str
+        Name used in logs for the client.
+    remove_callback : typing.Callable
+        Callback used to remove the client after disconnect.
+    debug : bool
+        Whether debug logging is enabled.
+    showtelnet : bool
+        Whether all telnet commands are shown.
+    '''
+
+    x: int = 0
+    y: int = 0
+
+    gmcp: bool = False
+    mudclient: dict | None = None
+    disconnected: bool = False
+
+    username: str | None = None
+    user: tuple
+    privileges: list[str]
+    character: Character | None = None
+
+    conn: sqlite3.Connection
+    client: socket.socket
+    addr: tuple[str, int]
+    id: int
+    td: int | str
+    remove_callback: typing.Callable
+    debug: bool
+    showtelnet: bool
+
+    def __init__(self, client: socket.socket, addr: tuple[str, int], id: int, remove_callback: typing.Callable, debug: bool = False, showtelnet: bool = False) -> None:
+        '''
+        Initializes a Client object
+
+        Parameters
+        ----------
+        client : socket.socket
+            Client socket.
+        addr : tuple[str, int]
+            Address of the connected client.
+        id : int
+            ID of the client.
+        remove_callback : typing.Callable
+            Callback used to remove the client after disconnect.
+        debug : bool, optional
+            Whether debug logging is enabled. (default is False)
+        showtelnet : bool, optional
+            Whether all telnet commands are shown. (default is False)
+        '''
+        self.client = client
+        self.addr = addr
+        self.id = id
+        self.td = id
         self.remove_callback = remove_callback
-        self.debug: bool = debug
-        self.showtelnet: bool = showtelnet
+        self.debug = debug
+        self.showtelnet = showtelnet
+
+        self.privileges = []
+        self.user = ()
+        self.conn = db.get()
     
-    def menu(self,options:list[str],name="",input_string="Command: ",other_options: bool = False,string=False):
+    def menu(self, options:list[str], name: str = "", input_string: str ="Command: ", other_options: bool = False, string: bool = False):
+        '''
+        Displays selection menu to the Client
+
+        Parameters
+        ----------
+        options : list[str]
+            Selectable options in menu
+        name : str, optional
+            Name of menu (default is "")
+        input_string: str, optional
+            String shown at bottom (default is "Command: ")
+        other_options: bool, optional
+            Whether the Client can input other options than in the list (default is False)
+        string: bool, optional
+            Whether the return type should be a string or the index (default is False)
+        '''
         menu = " " + YELLOW.apply(DARK_BLUE.apply(f'{name}:\n',bg=True))
         for idx,i in enumerate(options):
             menu += f" {DARK_BLUE.apply(reset=False, bg=True)}{YELLOW.apply(str(idx))}) {CYAN.apply(i)}\n"
@@ -54,12 +144,51 @@ class Client:
             elif other_options == True:
                 return recv
 
-    def pmenu(self,pages:list[dict]):
+    def pmenu(self, pages:list[dict[str, typing.Any]]) -> dict[str, typing.Any]:
+        '''
+        Shows a multi-page menu to the client.
+
+        Each page dictionary must contain at least:
+            - "type": Type of the page.
+            - "name": Name of menu & Key to retrieve data from.
+
+        Supported page types:
+            - "options":
+                Expects an "options" list. Displays a selectable menu using
+                `self.menu(...)`. A "Back" option is automatically added if this
+                is not the first page.
+                The selected option is stored under the page's name.
+
+            - "custom":
+                Expects a callable under "function". The function is called with
+                `self` and should return either:
+                    - "Back" to navigate to the previous page
+                    - A dict of values to merge into the chosen results.
+
+            - str:
+                Normal input using `self.input(...)`.
+                Typing "back" (case-insensitive) navigates to the previous page
+                when not on the first page.
+
+        Parameters
+        ----------
+        pages : list[dict[str, Any]]
+            A list of page definitions
+
+        Returns
+        -------
+        dict[str, Any]
+            All the selected options indexed by menu name
+        '''
         current_menu = 0
         chosen = {}
         while current_menu < len(pages):
             page = pages[current_menu]
+            if "type" not in page or "name" not in page:
+                raise ValueError("Page should have 'name' & 'type' keys")
             if page["type"] == "options":
+                if "options" not in page:
+                    raise ValueError("Page with type 'options' should have a 'options' key")
                 options = page["options"]
                 if current_menu != 0:
                     options.append("Back")
@@ -74,6 +203,8 @@ class Client:
                     chosen[page["name"]] = recv
                     current_menu += 1
             elif page["type"] == "custom":
+                if "function" not in page:
+                    raise ValueError("Page with type 'custom' should have a 'function' key")
                 recv = page["function"](self)
                 if recv == "Back":
                     current_menu -= 1
