@@ -1,8 +1,8 @@
-from utils.logging import start
+from tome.utils.logging import start
 start(True)
 
-from client.client import Client
-from client.mainmenu import login
+from tome.client.client import Client
+from tome.client.mainmenu import login
 
 class Test:
     def __init__(self, name:str="Test"):

@@ -1,5 +1,5 @@
-from tests import Test, TestingClient
-from client.mainmenu import login
+from tome.tests import Test, TestingClient
+from tome.client.mainmenu import login
 
 class GmcpTest(Test):
     def __init__(self):

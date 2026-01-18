@@ -1,5 +1,5 @@
-from tests import Test, TestingClient
-from client.mainmenu import mainmenu,login
+from tome.tests import Test, TestingClient
+from tome.client.mainmenu import mainmenu,login
 
 class MainMenuTest(Test):
     def __init__(self):
