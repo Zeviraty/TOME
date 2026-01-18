@@ -21,10 +21,12 @@ class ProfanityChecker:
         words = re.findall(r"\b\w+\b", text.lower())
         return any(word in self.profanity_set for word in words)
 
-try:
-    pchecker = ProfanityChecker()
-except:
-    log.warn("FAILED TO INITIALIZE PROFANITY CHECKER",name="profanity")
+def init_checker():
+    try:
+        global pchecker
+        pchecker = ProfanityChecker()
+    except:
+        log.warn("FAILED TO INITIALIZE PROFANITY CHECKER",name="profanity")
 
 def check_profanity(text: str) -> bool:
     return pchecker.contains_profanity(text)

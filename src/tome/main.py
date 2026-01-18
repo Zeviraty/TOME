@@ -3,6 +3,7 @@ import threading
 from . import banners
 from .utils.color import RESET
 from .utils import logging as log
+from .utils import profanity
 import click
 import os
 from .client.client import Client
@@ -58,6 +59,7 @@ def main(server,debug, telnet):
 def cmd(bind = "0.0.0.0", port = 2323, debug=False, telnet=False):
     log.start()
     sending.init_sender()
+    profanity.init_checker()
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((bind, port))
