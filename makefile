@@ -9,7 +9,7 @@ ifeq ($(PYTHON),)
 $(error No Python interpreter found (python3 or python))
 endif
 
-.PHONY: install run clean genreqs updatelibs check dist distcheck
+.PHONY: install run clean updatelibs check dist distcheck
 
 install:
 	$(MAKE) updatelibs
@@ -34,12 +34,6 @@ endif
 
 clean:
 	rm -rf logs/*.log
-
-genreqs:
-	mv monitor ./src/monitor.py
-	pipreqs ./src --force
-	mv ./src/monitor.py monitor
-	mv ./src/requirements.txt ./requirements.txt
 
 check:
 	@echo "Running checks..."
