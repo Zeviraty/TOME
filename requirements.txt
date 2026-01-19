@@ -1,6 +1,5 @@
-click==8.2.1
-psutil==7.0.0
-pyfiglet==1.0.2
-textual==3.7.1
-toml==0.10.2
-trogon==0.6.0
+click>=8.2
+psutil>=7.0.0
+pyfiglet>=1.0.2
+toml>=0.10.2
+trogon>=0.6.0
