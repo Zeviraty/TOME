@@ -1,9 +1,20 @@
 import tome.utils.import_lib as il
 import tome.utils.config as conf
 import tome.utils.logging as log
+from . import Client
 import re
 
-def parse_command(cmd, client):
+def parse_command(cmd: str, client: Client) -> None:
+    '''
+    Parses a command inputted by the Client
+
+    Parameters
+    ----------
+    cmd : str
+        Command to be parsed
+    client : Client
+        Client (used for sending error messages)
+    '''
     tokens = []
     for quoted, bare in re.findall(r'"([^"]+)"|(\S+)', cmd):
         tokens.append(quoted or bare)
@@ -21,7 +32,15 @@ def parse_command(cmd, client):
         log.error(f"Error loading command: {cmd}:\n{e}",name=client.td)
         return
 
-def play(client):
+def play(client: Client):
+    '''
+    Main game loop
+
+    Parameters
+    ----------
+    client : Client
+        Client for the game loop
+    '''
     while not client.disconnected:
         cmd = client.input()
         parse_command(cmd,client)
