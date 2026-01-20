@@ -3,8 +3,17 @@ from tome.utils.color import *
 import tome.utils.logging as log
 import tome.utils.config as config
 import tome.client.telnet as telnet
+from tome.client.client import Client
 
-def racemenu(client):
+def racemenu(client: Client) -> None:
+    '''
+    Shows a menu to select a race for a character
+
+    Parameters
+    ----------
+    client : Client
+        Client to show menu to
+    '''
     races = {entry['name']: entry['subs'] for entry in config.get_dir("races",ls=True)}
     keys = list(races.keys())
     keys.append("Back")
@@ -33,7 +42,15 @@ def racemenu(client):
             return {"sub_race": sub_race, "race":race}
 
 
-def mainmenu(client):
+def mainmenu(client: Client) -> None:
+    '''
+    Shows the main menu to a Client
+
+    Parameters
+    ----------
+    client : Client
+        Client to show main menu to
+    '''
     while True:
         if client.disconnected:
             return
@@ -107,7 +124,23 @@ def mainmenu(client):
                 else:
                     client.send("Not the name of a character or a command.")
 
-def login(client, player:str|None=None,gmcp:bool = True, amount=0,askpassword=False) -> None:
+def login(client: Client, player:str|None=None,gmcp:bool = True, amount: int = 0,askpassword: bool = False) -> None:
+    '''
+    Login sequence for a Client
+
+    Parameters
+    ----------
+    client : Client
+        Client to log in
+    player : str|None, optional
+        Username of client (default is None)
+    gmcp : bool, optional
+        If gmcp should be enabled (default is True)
+    amount : int, optional
+        Amount of tries that have occurred (default is 0)
+    askpassword : bool
+        If there should be asked for a new password (default is False)
+    '''
     if client.disconnected:
         return
     if amount > 5:
