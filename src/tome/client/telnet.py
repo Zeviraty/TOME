@@ -1,4 +1,17 @@
 import json
+from . import Client
+'''
+Telnet module
+
+Used for sending & receiving telnet sequences
+
+Constants
+---------
+TELNET_COMMANDS
+    A dict of telnet commands that are supported to be sent
+INVERSE_TELNET
+    A dict of telnet commands that are supported to be received
+'''
 
 TELNET_COMMANDS = {
     # Telnet command bytes (RFC 854)
@@ -48,7 +61,17 @@ INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
 INVERSE_TELNET[bytes([1])] = "ECHO"
 del INVERSE_TELNET[bytes([2])]
 
-def send(client, content: str = "") -> None:
+def send(client: Client, content: str = "") -> None:
+    '''
+    Send a telnet sequence
+
+    Parameters
+    ----------
+    client : Client
+        Client to send a telnet sequence
+    content : str, optional
+        Telnet commands to send (default is "")
+    '''
     message: bytes = b""
     if client.showtelnet == True:
         client.send("Sending telnet commands: "+content)
@@ -62,7 +85,20 @@ def send(client, content: str = "") -> None:
     except (BrokenPipeError, OSError):
         client.disconnect()
 
-def get(client) -> dict:
+def get(client: Client) -> dict:
+    '''
+    Get a telnet command sequence from the Client
+
+    Parameters
+    ----------
+    client : Client
+        Client to get sequence from
+
+    Returns
+    -------
+    dict
+        Dictionary with all the commands
+    '''
     data = client.bget()
     gmcp_data = {}
     telnet_log = []
