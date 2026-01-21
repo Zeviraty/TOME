@@ -9,6 +9,7 @@ from tome.world.entities.character import Character
 import sqlite3
 import typing
 import collections.abc as abc
+from typing import Any
 
 class Client:
     '''
@@ -34,6 +35,8 @@ class Client:
         List of privileges the user has.
     character : Character | None
         The character the user is controlling.
+    character_data : dict[str, Any]
+        Data of the character
     conn : sqlite3.Connection
         Database connection.
     client : socket.socket
@@ -63,6 +66,7 @@ class Client:
     user: tuple
     privileges: list[str]
     character: Character | None = None
+    character_data: dict[str, Any]
 
     conn: sqlite3.Connection
     client: socket.socket
@@ -99,6 +103,7 @@ class Client:
         self.remove_callback = remove_callback
         self.debug = debug
         self.showtelnet = showtelnet
+        self.character_data = {}
 
         self.privileges = []
         self.user = ()

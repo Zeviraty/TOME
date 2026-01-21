@@ -5,7 +5,7 @@ import tome.utils.config as config
 import tome.client.telnet as telnet
 from tome.client.client import Client
 
-def racemenu(client: Client) -> None:
+def racemenu(client: Client) -> str | dict[str, str | None]:
     '''
     Shows a menu to select a race for a character
 
@@ -81,20 +81,22 @@ def mainmenu(client: Client) -> None:
 
                 recv = client.pmenu(menus)
 
-                client.character["Class"] = recv["Class"]
-                client.character["Sub-race"] = recv["sub_race"]
-                client.character["Race"] = recv["race"]
-                client.character["Name"] = recv["Name"]
-                client.character["Gender"] = recv["Gender"]
-                client.character["A1"] = recv["Alignment 1"]
-                client.character["A2"] = recv["Alignment 2"]
 
-                client.character["ID"] = client.conn.execute("INSERT INTO characters (name, account_id) VALUES (?,?) RETURNING id;",(recv["Name"],client.user[0])).fetchone()[0]
 
-                for k,v in client.character.items():
+                client.character_data["Class"] = recv["Class"]
+                client.character_data["Sub-race"] = recv["sub_race"]
+                client.character_data["Race"] = recv["race"]
+                client.character_data["Name"] = recv["Name"]
+                client.character_data["Gender"] = recv["Gender"]
+                client.character_data["A1"] = recv["Alignment 1"]
+                client.character_data["A2"] = recv["Alignment 2"]
+
+                client.character_data["ID"] = client.conn.execute("INSERT INTO characters (name, account_id) VALUES (?,?) RETURNING id;",(recv["Name"],client.user[0])).fetchone()[0]
+
+                for k,v in client.character_data.items():
                     if k == "Name" or k == "ID":
                         continue
-                    client.conn.execute("INSERT INTO character_attributes (attr_name, attr_value, character_id) VALUES (?,?,?)",(k,v,client.character["ID"]))
+                    client.conn.execute("INSERT INTO character_attributes (attr_name, attr_value, character_id) VALUES (?,?,?)",(k,v,client.character_data["ID"]))
 
                 client.conn.commit()
                 if client.yn("Play as "+recv["Name"]+"? "):
@@ -120,6 +122,7 @@ def mainmenu(client: Client) -> None:
                     while False in id:
                         id.remove(False)
                     attributes = client.conn.execute("SELECT * FROM character_attributes WHERE character_id = ?;",(id[0],)).fetchall()
+                    client.character_data['attributes'] = attributes
                     break
                 else:
                     client.send("Not the name of a character or a command.")
@@ -168,7 +171,7 @@ def login(client: Client, player:str|None=None,gmcp:bool = True, amount: int = 0
             client.conn.commit()
         client.username = username
         client.user = client.conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-        log.info(f"Logged in as: {client.username}",name=client.td)
+        log.info(f"Logged in as: {client.username}",name=str(client.td))
         client.td = client.username
         if askpassword:
             privileges = client.conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(client.user[0],)).fetchall()
@@ -187,7 +190,7 @@ def login(client: Client, player:str|None=None,gmcp:bool = True, amount: int = 0
             client.send(f"Logged in as: {username}.\n")
             client.username = username
             client.user = client.conn.execute("SELECT * FROM accounts WHERE name = ?;",(username,)).fetchone()
-            log.info(f"Logged in as: {client.username}",name=client.td)
+            log.info(f"Logged in as: {client.username}",name=str(client.td))
             client.td = client.username
             privileges = client.conn.execute("SELECT privilege FROM account_privileges WHERE account_id = ?;",(client.user[0],)).fetchall()
             for i in privileges:
