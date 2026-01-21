@@ -1,7 +1,7 @@
 import shutil,os
 import click
 from trogon import tui
-from utils import backup_db, get, init_db, get_latest_backup, resolve_schema_path
+from tome.db.utils import backup_db, get, init_db, get_latest_backup, resolve_schema_path
 
 @tui()
 @click.group()
@@ -296,7 +296,7 @@ def table(table):
     print(f"id{' '*(maxlen_id-2)}|name{' '*(maxlen_name-4)}|type{' '*(maxlen_type-4)}|nn{' '*(maxlen_nn-2)}|")
     print(f"--{'-'*(maxlen_id-2)}|----{'-'*(maxlen_name-4)}|----{'-'*(maxlen_type-4)}|--{'-'*(maxlen_nn-2)}|")
     for item in data:
-        print(f"id{' ' * (maxlen_id - 2)}|name{' ' * (maxlen_name - 4)}|type{' ' * (maxlen_type - 4)}|nn{' ' * (maxlen_nn - 2)}|")
+        print(f"{item[0]}{' ' * (maxlen_id - len(str(item[0]))+1)}|{item[1]}{' ' * (maxlen_name - len(item[1]))}|{item[2]}{' ' * (maxlen_type - len(item[2]))}|{item[3]}{' ' * (maxlen_nn - len(str(item[3]))+1)}|")
 
 if __name__ == '__main__':
     cli()
