@@ -2,7 +2,7 @@ from tome.utils.logging import start
 start(True)
 
 from tome.client.client import Client
-from tome.client.mainmenu import login
+from socket import socket
 
 class Test:
     def __init__(self, name:str="Test"):
@@ -18,7 +18,7 @@ def p(content):
 
 class TestingClient(Client):
     def __init__(self,bytesinbuffer=False):
-        super().__init__(0,0,0,0)
+        super().__init__(socket(),("",0),0,lambda: print("removed"))
         self.bytesinbuffer = bytesinbuffer
         self.buffer = []
         self.inputbuffer = []
@@ -47,6 +47,7 @@ class TestingClient(Client):
                 return self.inputbuffer.pop(0).encode()
             elif type(popped) == bytes:
                 return popped
+            return b""
 
         except IndexError:
             p("No more inputs left from the inputbuffer")
