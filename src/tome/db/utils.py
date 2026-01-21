@@ -3,8 +3,33 @@ from datetime import datetime
 import shutil,os
 import click
 
-def resolve_schema_path(schema_name, base_path="db/schemas", ext=".sql"):
-    """Convert schema name like 'test.001' into a path like 'db/schemas/test/001-*.sql'."""
+def resolve_schema_path(schema_name: str, base_path: str = "db/schemas", ext: str = ".sql") -> None | str:
+    '''
+    Convert schema name like 'test.001' into a path like 'db/schemas/test/001-*.sql'.
+
+    Parameters
+    ----------
+    schema_name : str
+        Name of the schema
+    base_path : str, optional
+        Base path to schema folder (default is 'db/schemas')
+    ext : str, optional
+        Extension to search for (default is '.sql')
+
+    Raises
+    ------
+    ValueError:
+        Raised if an invalid schema format is used
+    FileNotFoundError:
+        Raised if the schema directory does not exist
+    FileNotFoundError:
+        Raised if no schema file found
+
+    Returns
+    -------
+    None | str
+        The schema file path or None
+    '''
     parts = schema_name.split(".")
     if len(parts) != 2:
         raise ValueError(f"Invalid schema name format: '{schema_name}'. Use format 'folder.number'.")
@@ -25,15 +50,34 @@ def resolve_schema_path(schema_name, base_path="db/schemas", ext=".sql"):
 
     raise FileNotFoundError(f"No matching schema file found for '{schema_name}' in '{schema_dir}'")
 
-def backup_db():
+def backup_db() -> None:
+    '''
+    Create a backup of the database
+    '''
     if os.path.exists("db/database.db"):
         dt_string = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
         shutil.copy("db/database.db", f"db/backups/{dt_string}.db")
 
 def get() -> sqlite3.Connection:
+    '''
+    Get a database connection
+
+    Returns
+    -------
+    sqlite3.Connection
+        The connection
+    '''
     return sqlite3.connect('db/database.db', timeout=100.0)
 
-def get_latest_backup():
+def get_latest_backup() -> None | str:
+    '''
+    Gets the latest backup
+
+    Returns
+    -------
+    None | str
+        The backup file path or None
+    '''
     datetime_format = "%d-%m-%Y_%H-%M-%S"
     backups = []
 
@@ -51,7 +95,18 @@ def get_latest_backup():
 
     return max(backups)[1]
 
-def init_db(dobackup=True, clickecho=False):
+def init_db(dobackup: bool = True, clickecho: bool = False) -> None:
+    '''
+    Initialize the database
+
+    Parameters
+    ----------
+    dobackup : bool
+        If the existing database should be backed up
+    clickecho : bool
+        If click.echo should be used instead of print
+    '''
+    
     if clickecho:
         click.echo("Initializing database...")
     else:
