@@ -25,11 +25,14 @@ def parse_command(cmd: str, client: Client) -> None:
         client.send(f"Command: {cmd} not found.")
         return
     try:
+        if not mod is str:
+            log.error("Mod is not a string")
+            return
         module = il.load_module(f"config/commands/{mod.split('.')[0]}.py")
         module.__getattribute__(mod.split('.')[1])(client=client,arguments=args)
     except Exception as e:
         client.send(f"Error loading command: {cmd}")
-        log.error(f"Error loading command: {cmd}:\n{e}",name=client.td)
+        log.error(f"Error loading command: {cmd}:\n{e}",name=str(client.td))
         return
 
 def play(client: Client):
