@@ -21,7 +21,7 @@ install:
 	@chmod +x ./dbcli ./run.sh ./clean
 	@mkdir logs -p
 	@$(PYTHON) src/tome/db/cli.py full-init --force
-	@pip install -e .
+	@pip install -e . --break-system-packages
 
 run:
 	$(PYTHON) src/tome
