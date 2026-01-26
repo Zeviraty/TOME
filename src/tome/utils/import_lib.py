@@ -37,8 +37,12 @@ def load_module(source, module_name=None):
         module_name = gensym()
 
     spec = importlib.util.spec_from_file_location(module_name, source)
+    if spec is None:
+        return
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module
+    if spec.loader is None:
+        return
     spec.loader.exec_module(module)
 
     return module
