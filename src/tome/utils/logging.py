@@ -39,7 +39,7 @@ def warn(*text, name:str="+"):
     *text : str
         Contents of message
     name : str, optional
-        Name to use in logging
+        Name to use in logging (default is '+')
     '''
     text = " ".join(text)
     if testing:
@@ -60,7 +60,7 @@ def error(*text, name:str="+"):
     *text : str
         Contents of message
     name : str, optional
-        Name to use in logging
+        Name to use in logging (default is '+')
     '''
     text = " ".join(text)
     if testing:
@@ -81,7 +81,7 @@ def info(*text, name:str="+"):
     *text : str
         Contents of message
     name : str, optional
-        Name to use in logging
+        Name to use in logging (default is '+')
     '''
     text = " ".join(text)
     if testing:
@@ -102,7 +102,7 @@ def disconnect(*text, name:str="+"):
     *text : str
         Contents of message
     name : str, optional
-        Name to use in logging
+        Name to use in logging (default is '+')
     '''
     text = " ".join(text)
     if testing:
@@ -125,7 +125,7 @@ def pwarn(*text, name:str="+"):
     *text : str
         Contents of message
     name : str, optional
-        Name to use in logging
+        Name to use in logging (default is '+')
     '''
     text = " ".join(text)
     if testing:
@@ -145,7 +145,7 @@ def perror(*text, name:str="+"):
     *text : str
         Contents of message
     name : str, optional
-        Name to use in logging
+        Name to use in logging (default is '+')
     '''
     text = " ".join(text)
     if testing:
@@ -165,7 +165,7 @@ def pinfo(*text, name:str="+"):
     *text : str
         Contents of message
     name : str, optional
-        Name to use in logging
+        Name to use in logging (default is '+')
     '''
     text = " ".join(text)
     if testing:
