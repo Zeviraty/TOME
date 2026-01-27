@@ -5,7 +5,15 @@ from pprint import pp
 current_log = ""
 testing = False
 
-def start(testing_mode=False):
+def start(testing_mode: bool = False):
+    '''
+    Start logging
+
+    Parameters
+    ----------
+    testing_mode : bool
+        If it sould initialize into testing mode
+    '''
     if not os.path.exists("logs"):
         os.mkdir("logs")
 
@@ -23,6 +31,16 @@ def start(testing_mode=False):
             current_log += "1"
 
 def warn(*text, name:str="+"):
+    '''
+    Print a log with level 'WARN'
+
+    Parameters
+    ----------
+    *text : str
+        Contents of message
+    name : str, optional
+        Name to use in logging
+    '''
     text = " ".join(text)
     if testing:
         return
@@ -34,6 +52,16 @@ def warn(*text, name:str="+"):
     print(str(display)+"\033[0m",end="")
 
 def error(*text, name:str="+"):
+    '''
+    Print a log with level 'ERROR'
+
+    Parameters
+    ----------
+    *text : str
+        Contents of message
+    name : str, optional
+        Name to use in logging
+    '''
     text = " ".join(text)
     if testing:
         return
@@ -45,6 +73,16 @@ def error(*text, name:str="+"):
     print(str(display)+"\033[0m",end="")
 
 def info(*text, name:str="+"):
+    '''
+    Print a log with level 'INFO'
+
+    Parameters
+    ----------
+    *text : str
+        Contents of message
+    name : str, optional
+        Name to use in logging
+    '''
     text = " ".join(text)
     if testing:
         return
@@ -56,6 +94,16 @@ def info(*text, name:str="+"):
     print(str(display)+"\033[0m",end="")
 
 def disconnect(*text, name:str="+"):
+    '''
+    Print a log with level 'DISCONNECT'
+
+    Parameters
+    ----------
+    *text : str
+        Contents of message
+    name : str, optional
+        Name to use in logging
+    '''
     text = " ".join(text)
     if testing:
         return
@@ -69,6 +117,16 @@ def disconnect(*text, name:str="+"):
 
 
 def pwarn(*text, name:str="+"):
+    '''
+    PrettyPrint a log with level 'WARN'
+
+    Parameters
+    ----------
+    *text : str
+        Contents of message
+    name : str, optional
+        Name to use in logging
+    '''
     text = " ".join(text)
     if testing:
         return
@@ -79,6 +137,16 @@ def pwarn(*text, name:str="+"):
     print("\033[0m",end=" ")
 
 def perror(*text, name:str="+"):
+    '''
+    PrettyPrint a log with level 'ERROR'
+
+    Parameters
+    ----------
+    *text : str
+        Contents of message
+    name : str, optional
+        Name to use in logging
+    '''
     text = " ".join(text)
     if testing:
         return
@@ -89,6 +157,16 @@ def perror(*text, name:str="+"):
     print("\033[0m",end=" ")
 
 def pinfo(*text, name:str="+"):
+    '''
+    PrettyPrint a log with level 'INFO'
+
+    Parameters
+    ----------
+    *text : str
+        Contents of message
+    name : str, optional
+        Name to use in logging
+    '''
     text = " ".join(text)
     if testing:
         return
