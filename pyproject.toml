@@ -4,7 +4,7 @@ dynamic = ["dependencies"]
 authors = [ {name = "Zevvi", email = "Zeviraty@gmail.com"} ]
 description = "A modular mud engine"
 readme = "README.md"
-license-files = ["LICENCSE"]
+license-files = ["LICENSE"]
 version = "0.0.1"
 
 [tool.setuptools.dynamic]
