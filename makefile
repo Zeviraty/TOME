@@ -20,8 +20,8 @@ install:
 	@echo make clean > clean
 	@chmod +x ./dbcli ./run.sh ./clean
 	@mkdir logs -p
-	@$(PYTHON) src/tome/db/cli.py full-init --force
 	@pip install -e . --break-system-packages
+	@$(PYTHON) src/tome/db/cli.py full-init --force
 
 run:
 	$(PYTHON) src/tome
