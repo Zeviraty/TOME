@@ -52,7 +52,7 @@ dist:
 
 distcheck:
 	@echo "Creating source distribution package..."
-	@make dist || { echo "Error: Failed to create the distribution package"; exit 1; }
+	@$(MAKE) dist || { echo "Error: Failed to create the distribution package"; exit 1; }
 
 	@mkdir -p tmp-distcheck
 	@tar -xzf TOME.tar.gz -C tmp-distcheck
