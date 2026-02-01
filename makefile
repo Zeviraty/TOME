@@ -9,7 +9,7 @@ ifeq ($(PYTHON),)
 $(error No Python interpreter found (python3 or python))
 endif
 
-.PHONY: install run clean updatelibs check dist distcheck
+.PHONY: install run clean updatelibs check dist distcheck mapjq
 
 install:
 	$(MAKE) updatelibs
