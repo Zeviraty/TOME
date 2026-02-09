@@ -1,5 +1,4 @@
 import json
-from . import Client
 '''
 Telnet module
 
@@ -61,7 +60,7 @@ INVERSE_TELNET = {v: k for k, v in TELNET_COMMANDS.items()}
 INVERSE_TELNET[bytes([1])] = "ECHO"
 del INVERSE_TELNET[bytes([2])]
 
-def send(client: Client, content: str = "") -> None:
+def send(client, content: str = "") -> None:
     '''
     Send a telnet sequence
 
@@ -85,7 +84,7 @@ def send(client: Client, content: str = "") -> None:
     except (BrokenPipeError, OSError):
         client.disconnect()
 
-def get(client: Client) -> dict:
+def get(client) -> dict:
     '''
     Get a telnet command sequence from the Client
 
