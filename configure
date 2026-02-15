@@ -1,5 +1,15 @@
 #!/bin/sh
 
+while getopts ":d" option; do
+   case $option in
+      d)
+         set DOCKER;;
+     \?)
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
 echo "Configuring TOME..."
 
 if command -v python3 >/dev/null 2>&1; then
@@ -42,25 +52,27 @@ echo ""
 if [ ! -d 'config' ]; then
     mkdir config
 
-    read -p "Enter directory for database [$(pwd)/db]: " DATABASE_DIR
+    if [ -z "$DOCKER" ]; then 
+        read -p "Enter directory for database [$(pwd)/db]: " DATABASE_DIR
+    fi
     DATABASE_DIR=${DATABASE_DIR:-$(pwd)/db}
 
-    if [ ! -d $DATABASE_DIR ]; then mkdir $DATABASE_DIR 
-    fi
-    if [ ! -d "$DATABASE_DIR/backups" ]; then mkdir "$DATABASE_DIR/backups"
-    fi
+    if [ ! -d $DATABASE_DIR ]; then mkdir $DATABASE_DIR; fi
+    if [ ! -d "$DATABASE_DIR/backups" ]; then mkdir "$DATABASE_DIR/backups"; fi
 
     DATABASE_DIR=$(echo $DATABASE_DIR | sed 's/\//\\\//g')
     cp defaults/TOME.toml config/
     sed -i "s/DB_DIR/$DATABASE_DIR/" config/TOME.toml
 
-    for default in classes maps profanity races
-    do
+    for default in classes maps profanity races; do
         read -p "Copy default $default? [Y/n] " COPY
-        case $COPY in [yY][eE][sS]|[yY]|[jJ]|'')
-            cp -r defaults/$default config/
-        ;; *) mkdir config/$default
-        esac
+        if [ -z "$DOCKER" ]; then
+            case $COPY in [yY][eE][sS]|[yY]|[jJ]|'')
+                cp -r defaults/$default config/
+            ;; *) mkdir config/$default
+            esac
+        else cp -r defaults/$default config/
+        fi
     done
 
     cp -r defaults/commands config/commands
