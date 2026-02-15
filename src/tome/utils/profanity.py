@@ -33,7 +33,7 @@ class ProfanityChecker:
                 with open(filepath, "r", encoding="utf-8") as file:
                     for line in file:
                         word = line.strip().lower()
-                        if word:
+                        if word and not word.startswith("#"):
                             self.profanity_set.add(word)
 
     def contains_profanity(self, text:str) -> bool:
