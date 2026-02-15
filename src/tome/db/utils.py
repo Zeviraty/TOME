@@ -2,17 +2,22 @@ import sqlite3
 from datetime import datetime
 import shutil,os
 import click
+import tome.utils.config as config
 
-def resolve_schema_path(schema_name: str, base_path: str = "db/schemas", ext: str = ".sql") -> None | str:
+DATABASE_DIR = str(config.get("TOME.toml", "database_dir"))
+if DATABASE_DIR == None: exit(1)
+if DATABASE_DIR.endswith("/"): DATABASE_DIR = DATABASE_DIR.rstrip('/')
+
+def resolve_schema_path(schema_name: str, base_path: str = "schemas", ext: str = ".sql") -> None | str:
     '''
-    Convert schema name like 'test.001' into a path like 'db/schemas/test/001-*.sql'.
+    Convert schema name like 'test.001' into a path like 'schemas/test/001-*.sql'.
 
     Parameters
     ----------
     schema_name : str
         Name of the schema
     base_path : str, optional
-        Base path to schema folder (default is 'db/schemas')
+        Base path to schema folder (default is 'schemas')
     ext : str, optional
         Extension to search for (default is '.sql')
 
@@ -54,9 +59,9 @@ def backup_db() -> None:
     '''
     Create a backup of the database
     '''
-    if os.path.exists("db/database.db"):
+    if os.path.exists(DATABASE_DIR+"/database.db"):
         dt_string = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-        shutil.copy("db/database.db", f"db/backups/{dt_string}.db")
+        shutil.copy("{DATABASE_DIR}/database.db", f"{DATABASE_DIR}/backups/{dt_string}.db")
 
 def get() -> sqlite3.Connection:
     '''
@@ -67,7 +72,7 @@ def get() -> sqlite3.Connection:
     sqlite3.Connection
         The connection
     '''
-    return sqlite3.connect('db/database.db', timeout=100.0)
+    return sqlite3.connect(DATABASE_DIR+'/database.db', timeout=100.0)
 
 def get_latest_backup() -> None | str:
     '''
@@ -81,7 +86,7 @@ def get_latest_backup() -> None | str:
     datetime_format = "%d-%m-%Y_%H-%M-%S"
     backups = []
 
-    for filename in os.listdir("db/backups"):
+    for filename in os.listdir(DATABASE_DIR+"/backups"):
         if filename.endswith(".db"):
             dt_str = filename[:-3]
             try:
@@ -112,8 +117,8 @@ def init_db(dobackup: bool = True, clickecho: bool = False) -> None:
     else:
         print("Initializing database...")
 
-    if not os.path.exists("db/backups"):
-        os.mkdir("db/backups")
+    if not os.path.exists(DATABASE_DIR+"/backups"):
+        os.mkdir(DATABASE_DIR+"/backups")
 
     if dobackup:
         backup_db()
@@ -125,7 +130,7 @@ def init_db(dobackup: bool = True, clickecho: bool = False) -> None:
     applied = {row[0] for row in cursor.fetchall()}
     conn.close()
 
-    for root, _, files in os.walk("db/schemas"):
+    for root, _, files in os.walk(DATABASE_DIR+"/schemas"):
         dirname = os.path.basename(root)
 
         files.sort()
@@ -134,7 +139,7 @@ def init_db(dobackup: bool = True, clickecho: bool = False) -> None:
             if not schema.endswith(".sql"):
                 continue
             schema_name = schema.replace(".sql", "")
-            schema_path = "db/schemas/"+dirname+"/"+schema_name+".sql"
+            schema_path = DATABASE_DIR+"/schemas/"+dirname+"/"+schema_name+".sql"
             display_name = f"{dirname}.{schema_name}" if dirname != "schemas" else schema_name
 
             if display_name in applied:
