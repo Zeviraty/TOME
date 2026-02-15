@@ -48,7 +48,7 @@ def check_thresholds(cpu_threshold=90, mem_threshold=90):
         print(f"\u26a0\ufe0f High usage detected! CPU: {cpu}%, Memory: {mem}%")
 
 
-def monitor_loop(interval=5, to_file=False, with_alerts=True):
+def monitor_loop(interval=1, to_file=False, with_alerts=True):
     try:
         while True:
             if to_file:
