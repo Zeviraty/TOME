@@ -39,13 +39,17 @@ echo "Found make"
 
 echo ""
 
-rm -rf config
-
 if [ ! -d 'config' ]; then
     mkdir config
 
     read -p "Enter directory for database [$(pwd)/db]: " DATABASE_DIR
     DATABASE_DIR=${DATABASE_DIR:-$(pwd)/db}
+
+    if [ ! -d $DATABASE_DIR ]; then mkdir $DATABASE_DIR 
+    fi
+    if [ ! -d "$DATABASE_DIR/backups" ]; then mkdir "$DATABASE_DIR/backups"
+    fi
+
     DATABASE_DIR=$(echo $DATABASE_DIR | sed 's/\//\\\//g')
     cp defaults/TOME.toml config/
     sed -i "s/DB_DIR/$DATABASE_DIR/" config/TOME.toml

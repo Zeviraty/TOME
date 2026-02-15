@@ -175,7 +175,7 @@ cython_debug/
 
 # db
 *.db
-./db
+/db
 
 # venv
 bin
