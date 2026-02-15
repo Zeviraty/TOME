@@ -12,7 +12,7 @@ else
 fi
 
 # Check Python version
-PYTHON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+PYTHON_VERSION=$(${PYTHON} -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
 echo "Found Python $PYTHON_VERSION"
 
 # Check pip
@@ -20,13 +20,51 @@ if ! command -v pip >/dev/null 2>&1; then
     echo "Error: pip is not installed."
     exit 1
 fi
+echo "Found pip: $(pip --version)"
 
 # Check for pipreqs
-if ! pip show pipreqs >/dev/null 2>&1; then
+if ! command -v pipreqs >/dev/null 2>&1; then
     echo "pipreqs not found, installing it now..."
     pip install --user pipreqs
     echo "Make sure your ~/.local/bin is in your PATH if 'pipreqs' can't be found."
 fi
+echo "Found pipreqs"
+
+# Check if make is installed
+if ! command -v make >/dev/null 2>&1; then
+    echo "Error: 'make' is not installed. Please install it and try again."
+    exit 1
+fi
+echo "Found make"
+
+echo ""
+
+rm -rf config
+
+if [ ! -d 'config' ]; then
+    mkdir config
+
+    read -p "Enter directory for database [$(pwd)/db]: " DATABASE_DIR
+    DATABASE_DIR=${DATABASE_DIR:-$(pwd)/db}
+    DATABASE_DIR=$(echo $DATABASE_DIR | sed 's/\//\\\//g')
+    cp defaults/TOME.toml config/
+    sed -i "s/DB_DIR/$DATABASE_DIR/" config/TOME.toml
+
+    for default in classes maps profanity races
+    do
+        read -p "Copy default $default? [Y/n] " COPY
+        case $COPY in [yY][eE][sS]|[yY]|[jJ]|'')
+            cp -r defaults/$default config/
+        ;; *) mkdir config/$default
+        esac
+    done
+
+    cp -r defaults/commands config/commands
+else
+    echo "Config directory already exists"
+fi
+
+echo ""
 
 echo "All requirements for setup are present."
 
@@ -37,4 +75,3 @@ echo "  make run        # to start the MUD"
 echo "  make clean      # to clear logs and caches"
 
 exit 0
-

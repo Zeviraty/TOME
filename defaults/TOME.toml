@@ -1,0 +1,6 @@
+version = "0.0.1"
+database_dir = "DB_DIR"
+
+[networking]
+external_ip = "127.0.0.1"
+external_port = 2323

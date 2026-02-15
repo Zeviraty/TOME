@@ -1,0 +1,272 @@
+{
+  "tst0": {
+    "name": "tst0",
+    "x": 12,
+    "y": 11,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 132
+      }
+    ],
+    "exits": [
+      {
+        "x": 8,
+        "y": 2,
+        "roomid": "tst1"
+      }
+    ]
+  },
+  "tst1": {
+    "name": "tst1",
+    "x": 16,
+    "y": 19,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 304
+      }
+    ],
+    "exits": [
+      {
+        "x": 3,
+        "y": 17,
+        "roomid": "tst2"
+      }
+    ]
+  },
+  "tst2": {
+    "name": "tst2",
+    "x": 11,
+    "y": 17,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 187
+      }
+    ],
+    "exits": [
+      {
+        "x": 2,
+        "y": 12,
+        "roomid": "tst3"
+      }
+    ]
+  },
+  "tst3": {
+    "name": "tst3",
+    "x": 8,
+    "y": 13,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 104
+      }
+    ],
+    "exits": [
+      {
+        "x": 1,
+        "y": 7,
+        "roomid": "tst4"
+      }
+    ]
+  },
+  "tst4": {
+    "name": "tst4",
+    "x": 13,
+    "y": 8,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 104
+      }
+    ],
+    "exits": [
+      {
+        "x": 2,
+        "y": 3,
+        "roomid": "tst5"
+      }
+    ]
+  },
+  "tst5": {
+    "name": "tst5",
+    "x": 5,
+    "y": 12,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 60
+      }
+    ],
+    "exits": [
+      {
+        "x": 1,
+        "y": 5,
+        "roomid": "tst6"
+      }
+    ]
+  },
+  "tst6": {
+    "name": "tst6",
+    "x": 15,
+    "y": 19,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 285
+      }
+    ],
+    "exits": [
+      {
+        "x": 3,
+        "y": 7,
+        "roomid": "tst7"
+      }
+    ]
+  },
+  "tst7": {
+    "name": "tst7",
+    "x": 10,
+    "y": 5,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 50
+      }
+    ],
+    "exits": [
+      {
+        "x": 6,
+        "y": 3,
+        "roomid": "tst8"
+      }
+    ]
+  },
+  "tst8": {
+    "name": "tst8",
+    "x": 15,
+    "y": 16,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 240
+      }
+    ],
+    "exits": [
+      {
+        "x": 13,
+        "y": 9,
+        "roomid": "tst9"
+      }
+    ]
+  },
+  "tst9": {
+    "name": "tst9",
+    "x": 9,
+    "y": 11,
+    "tiles": [
+      {
+        "char": {
+          "text": ".",
+          "fg": {
+            "color_code": 232
+          },
+          "bg": {
+            "color_code": -1
+          }
+        },
+        "opts": null,
+        "count": 99
+      }
+    ],
+    "exits": [
+      {
+        "x": 2,
+        "y": 3,
+        "roomid": "tst10"
+      }
+    ]
+  }
+}

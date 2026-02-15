@@ -174,10 +174,8 @@ cython_debug/
 .pypirc
 
 # db
-db/backups
-db/database.db
-db/database.db-journal
-db/schemas/edit
+*.db
+./db
 
 # venv
 bin
@@ -186,6 +184,7 @@ pyvenv.cfg
 include
 
 run
+config/
 clean
 dbcli
 logs/
@@ -194,5 +193,3 @@ gcp
 lines
 tools/map-editor/zte.py
 testlogs.txt
-config/*/*
-!config/commands/*
