@@ -15,13 +15,13 @@ install:
 	$(MAKE) updatelibs
 	@touch clean
 	@touch dbcli
-	@echo '$(PYTHON) src/tome/db/cli.py $$@' > dbcli
+	@echo '$(PYTHON) -m tome.db $$@' > dbcli
 	@echo make run > run.sh
 	@echo make clean > clean
 	@chmod +x ./dbcli ./run.sh ./clean
 	@mkdir logs -p
 	@pip install -e . --break-system-packages
-	@$(PYTHON) src/tome/db/cli.py full-init --force
+	@$(PYTHON) -m tome.db full-init --force
 
 run:
 	$(PYTHON) src/tome
