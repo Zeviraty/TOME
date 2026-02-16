@@ -73,7 +73,7 @@ def mainmenu(client: Client) -> None:
                 menus = [
                     {"name":"Class","type":"options","options":config.get_dir("classes",key="name",ls=True)},
                     {"name":"Race","type":"custom","function":racemenu},
-                    {"name":"Name","type":str},
+                    {"name":"Name","type":"str"},
                     {"name":"Gender","type":"options","options":["Male","Female","Non-Binary"]},
                     {"name":"Alignment 1","type":"options","options":["lawful","neutral","chaotic"]},
                     {"name":"Alignment 2","type":"options","options":["good","neutral","evil"]},

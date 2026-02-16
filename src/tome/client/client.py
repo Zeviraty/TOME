@@ -218,9 +218,11 @@ class Client:
                     chosen[page["name"]] = recv
                     current_menu += 1
             elif page["type"] == "custom":
+                print(page)
+                print(type(page["function"]))
                 if "function" not in page:
                     raise ValueError("Page with type 'custom' should have a 'function' key")
-                if not page['function'] is typing.Callable:
+                if not callable(page['function']):
                     raise ValueError("'function' key should be Callable")
                 recv = page["function"](self)
                 if recv == "Back":
@@ -236,6 +238,7 @@ class Client:
                     chosen[page["name"]] = recv
                     current_menu += 1
             else:
+                print(page["type"])
                 raise ValueError("Page type needs to be: 'options', 'custom' or 'str'")
         return chosen
 
