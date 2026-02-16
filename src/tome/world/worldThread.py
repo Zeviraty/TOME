@@ -1,6 +1,7 @@
 from . import map as m
 import tome.sending as sending
 import tome.utils.logging as log
+from time import sleep
 
 global maps
 maps = {
@@ -24,3 +25,4 @@ def worldThread():
                         else:
                             msg = sending.Message(recv.sender_id,"World",maps[recv.message["data"]["map"]].get_room(recv.message["data"]["roomid"]))
                             sending.send(msg)
+        sleep(0.01)

@@ -11,6 +11,7 @@ from .client import mainmenu as mm
 from . import sending as sending
 from .world.worldThread import worldThread
 from .client.game import play
+from time import sleep
 
 clients: list[Client] = []
 id = 0
@@ -50,6 +51,7 @@ def main(server,debug, telnet):
             client_handler.start()
         except BrokenPipeError:
             log.disconnect(f"{addr[0]}:{addr[1]} broke pipe" )
+        sleep(0.01)
 
 @click.command()
 @click.option('-b','--bind', default="0.0.0.0", help="IP to bind to")
