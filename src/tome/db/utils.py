@@ -130,7 +130,7 @@ def init_db(dobackup: bool = True, clickecho: bool = False) -> None:
     applied = {row[0] for row in cursor.fetchall()}
     conn.close()
 
-    for root, _, files in os.walk(DATABASE_DIR+"/schemas"):
+    for root, _, files in os.walk("schemas"):
         dirname = os.path.basename(root)
 
         files.sort()
@@ -139,7 +139,7 @@ def init_db(dobackup: bool = True, clickecho: bool = False) -> None:
             if not schema.endswith(".sql"):
                 continue
             schema_name = schema.replace(".sql", "")
-            schema_path = DATABASE_DIR+"/schemas/"+dirname+"/"+schema_name+".sql"
+            schema_path = "schemas/"+dirname+"/"+schema_name+".sql"
             display_name = f"{dirname}.{schema_name}" if dirname != "schemas" else schema_name
 
             if display_name in applied:
