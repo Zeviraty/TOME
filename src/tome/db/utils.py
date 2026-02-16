@@ -61,7 +61,7 @@ def backup_db() -> None:
     '''
     if os.path.exists(DATABASE_DIR+"/database.db"):
         dt_string = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-        shutil.copy("{DATABASE_DIR}/database.db", f"{DATABASE_DIR}/backups/{dt_string}.db")
+        shutil.copy(f"{DATABASE_DIR}/database.db", f"{DATABASE_DIR}/backups/{dt_string}.db")
 
 def get() -> sqlite3.Connection:
     '''
