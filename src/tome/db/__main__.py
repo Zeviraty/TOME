@@ -24,7 +24,7 @@ def full_init(force) -> None:
         backup_db()
     if os.path.exists("db/database.db"):
         os.remove("db/database.db")
-    for i in ["db","db/schemas","db/backups"]:
+    for i in ["db","schemas","db/backups"]:
         if not os.path.exists(i):
             click.echo(f"Creating {i}...")
             os.makedirs(i)
@@ -168,7 +168,7 @@ def new(schema, name):
     folder, number = schema.split(".")
     filename = f"{number}-{name}.sql"
     down_filename = f"{number}-{name}.down.sql"
-    dir_path = os.path.join("db/schemas", folder)
+    dir_path = os.path.join("schemas", folder)
     os.makedirs(dir_path, exist_ok=True)
     up_path = os.path.join(dir_path, filename)
     down_path = os.path.join(dir_path, down_filename)
@@ -200,7 +200,7 @@ def list():
         click.echo("No migrations have been applied yet.")
 
     unapplied = []
-    for root, _, files in os.walk("db/schemas"):
+    for root, _, files in os.walk("schemas"):
         dirname = os.path.basename(root)
 
         for schema in files:
@@ -263,11 +263,11 @@ def apply_all():
     conn.close()
 
     all_files = []
-    for root, _, files in os.walk("db/schemas"):
+    for root, _, files in os.walk("schemas"):
         files.sort()
         for file in files:
             if file.endswith(".sql") and not file.endswith(".down.sql"):
-                rel = os.path.relpath(os.path.join(root, file), "db/schemas")
+                rel = os.path.relpath(os.path.join(root, file), "schemas")
                 schema = rel.replace("/", ".").replace("\\", ".").replace(".sql", "")
                 all_files.append((schema, os.path.join(root, file)))
 
