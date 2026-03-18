@@ -1,3 +1,6 @@
+> [!WARNING]
+> This project has been moved to [sr.ht](https://sr.ht/~zevvi/Tome/)
+
 <div align="center">
   <br>
   <h1>Tome MUD</h1>
